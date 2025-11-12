@@ -1,0 +1,34 @@
+{
+  "name": "sketched",
+  "private": true,
+  "license": "UNLICENSED",
+  "version": "0.0.0",
+  "description": "A web game about drawing things from memory!",
+  "homepage": "https://github.com/shevtsod/sketched#readme",
+  "bugs": {
+    "url": "https://github.com/shevtsod/sketched/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shevtsod/sketched.git"
+  },
+  "author": "Daniel Shevtsov",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build:client": "npm --workspace client run build",
+    "build:server": "npm --workspace server run build",
+    "build": "conc -c auto 'npm:build:client' 'npm:build:server'",
+    "dev:client": "npm --workspace client run dev",
+    "dev:server": "npm --workspace server run start:debug",
+    "dev": "conc -c auto 'npm:dev:client' 'npm:dev:server'",
+    "test:client": "npm --workspace client run test:cov",
+    "test:server": "npm --workspace server run test:cov",
+    "test:server:e2e": "npm --workspace server run test:e2e",
+    "test": "conc -c auto 'npm:test:client' 'npm:test:server' 'npm:test:server:e2e'"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

@@ -1,0 +1,87 @@
+services:
+  # Sketched client
+  client:
+    image: "shevtsod/sketched-client:latest"
+    restart: "unless-stopped"
+    pull_policy: "build"
+    # Build image from Dockerfile
+    build:
+      context: "packages/client"
+      target: "development"
+    # Load environment variables from file
+    env_file:
+      - path: ".env"
+        required: false
+    # Override environment variables
+    environment:
+      DB_HOST: db
+      CACHE_HOST: cache
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount source code for hot reload
+      - "/app/node_modules"
+      - "./packages/client:/app"
+
+  # Sketched server
+  server:
+    image: "shevtsod/sketched-server:latest"
+    restart: "unless-stopped"
+    pull_policy: "build"
+    # Build image from Dockerfile
+    build:
+      context: "packages/server"
+      target: "development"
+    # Load environment variables from file
+    env_file:
+      - path: ".env"
+        required: false
+    ports:
+      - "3000:3000"
+      # Node.js debugger
+      - "9229:9229"
+    volumes:
+      # Mount source code for hot reload
+      - "/app/node_modules"
+      - "./packages/server:/app"
+
+  # database
+  # https://hub.docker.com/_/postgres
+  db:
+    image: "postgres:18-alpine"
+    restart: "unless-stopped"
+    environment:
+      POSTGRES_DB: "${DB_NAME:-sketched}"
+      POSTGRES_USER: "${DB_USER:-sketched}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-change-me}"
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      # Persist database data
+      - "postgres_data:/var/lib/postgresql/data"
+
+  # cache
+  # https://hub.docker.com/r/valkey/valkey/
+  cache:
+    image: "valkey/valkey:9-alpine"
+    restart: "unless-stopped"
+    # substitute env vars and run valkey-server
+    # note: valkey image does not include envsubst
+    entrypoint: >
+      sh -c 'sed -e "s/__CACHE_PORT__/${CACHE_PORT:-6379}/g" \
+        -e "s/__CACHE_USER__/${CACHE_USER:-sketched}/g" \
+        -e "s/__CACHE_PASSWORD__/${CACHE_PASSWORD:-change-me}/g" \
+        /usr/local/etc/valkey/valkey.conf.template > \
+        /usr/local/etc/valkey/valkey.conf && \
+        valkey-server /usr/local/etc/valkey/valkey.conf'
+    ports:
+      - "${CACHE_PORT:-6379}:6379"
+    volumes:
+      # https://valkey.io/topics/valkey.conf/
+      - "./docker/valkey/valkey.conf.template:/usr/local/etc/valkey/valkey.conf.template:ro"
+      # Persist cache data
+      - "valkey_data:/data"
+
+volumes:
+  postgres_data:
+  valkey_data:

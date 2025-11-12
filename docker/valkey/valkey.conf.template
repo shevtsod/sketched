@@ -1,0 +1,18 @@
+# Bind to all interfaces (optional)
+bind 0.0.0.0
+
+# Port to listen on
+port __CACHE_PORT__
+
+# Log level
+loglevel warning
+
+# https://valkey.io/topics/security/
+protected-mode yes
+
+# https://valkey.io/topics/persistence/
+save 60 1
+appendonly yes
+
+# https://valkey.io/topics/acl/
+user __CACHE_USER__ on >__CACHE_PASSWORD__ ~* &* +@all

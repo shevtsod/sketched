@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { DbService } from './db/db.service';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
+  constructor(private readonly dbService: DbService) {}
+
+  async getHello(): Promise<string> {
+    await this.dbService.db.query.users.findMany();
     return 'Hello World!';
   }
 }

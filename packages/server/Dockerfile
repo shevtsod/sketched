@@ -22,6 +22,9 @@ FROM base AS development
 
 EXPOSE 3000 9229
 
+# Pre-run script
+ENTRYPOINT ["./docker-entrypoint.sh"]
+
 CMD ["npm", "run", "start:debug"]
 
 # STAGE 3 - build
@@ -42,6 +45,9 @@ COPY --from=build /app/dist ./dist
 
 # Expose app port
 EXPOSE 3000
+
+# Pre-run script
+ENTRYPOINT ["./docker-entrypoint.sh"]
 
 # Start the app
 CMD ["node", "dist/main"]

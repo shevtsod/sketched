@@ -1,3 +1,5 @@
+# https://valkey.io/topics/valkey.conf/
+
 # Bind to all interfaces (optional)
 bind 0.0.0.0
 

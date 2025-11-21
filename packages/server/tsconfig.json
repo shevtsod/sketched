@@ -21,5 +21,9 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
+  },
+  // https://github.com/nestjs/nest/issues/11615
+  "watchOptions": {
+    "watchFile": "fixedPollingInterval"
   }
 }

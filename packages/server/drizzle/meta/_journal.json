@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1763753428579,
-      "tag": "0000_pink_unicorn",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1763753715271,
-      "tag": "0001_puzzling_phil_sheldon",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1763754201513,
-      "tag": "0002_premium_kate_bishop",
+      "when": 1763844131976,
+      "tag": "0000_chubby_puma",
       "breakpoints": true
     }
   ]

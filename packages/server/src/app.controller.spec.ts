@@ -36,7 +36,7 @@ describe('AppController', () => {
   describe('root', () => {
     it('should return "Hello World!"', async () => {
       expect(await appController.getHello()).toBe('Hello World!');
-      expect(dbService.db.query.users.findMany).toHaveBeenCalled();
+      expect(dbService.db.query.user.findMany).toHaveBeenCalled();
     });
   });
 });

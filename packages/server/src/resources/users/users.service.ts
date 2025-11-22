@@ -1,40 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { eq, inArray } from 'drizzle-orm';
 import { DbService } from '../../db/db.service';
-import { users } from '../../db/schema';
-import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
-import { User } from './entities/user.entity';
+import { user } from '../../db/schema';
+import { CreateUserInput } from './create-user.input';
+import { UpdateUserInput } from './update-user.input';
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly dbService: DbService) {}
 
   create(...createUserInputs: CreateUserInput[]): Promise<User[]> {
-    return this.dbService.db.insert(users).values(createUserInputs).returning();
+    return this.dbService.db.insert(user).values(createUserInputs).returning();
   }
 
   findAll(): Promise<User[]> {
-    return this.dbService.db.query.users.findMany();
+    return this.dbService.db.query.user.findMany();
   }
 
   findOne(id: number): Promise<User | undefined> {
-    return this.dbService.db.query.users.findFirst({ where: eq(users.id, id) });
+    return this.dbService.db.query.user.findFirst({ where: eq(user.id, id) });
   }
 
   update(id: number, updateUserInput: UpdateUserInput): Promise<User> {
     return this.dbService.db
-      .update(users)
+      .update(user)
       .set(updateUserInput)
-      .where(eq(users.id, id))
+      .where(eq(user.id, id))
       .returning()
       .then((res) => res[0]);
   }
 
   remove(...ids: number[]): Promise<User[]> {
     return this.dbService.db
-      .delete(users)
-      .where(inArray(users.id, ids))
+      .delete(user)
+      .where(inArray(user.id, ids))
       .returning();
   }
 }

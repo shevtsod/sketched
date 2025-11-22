@@ -6,7 +6,7 @@ export class AppService {
   constructor(private readonly dbService: DbService) {}
 
   async getHello(): Promise<string> {
-    await this.dbService.db.query.users.findMany();
+    await this.dbService.db.query.user.findMany();
     return 'Hello World!';
   }
 }

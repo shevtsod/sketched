@@ -30,14 +30,14 @@
     "drizzle": "drizzle-kit",
     "drizzle:generate": "npm run drizzle -- generate",
     "drizzle:migrate": "npm run drizzle -- migrate",
-    "drizzle:gm": "npm run drizzle:generate && npm run drizzle:migrate",
     "drizzle:pull": "npm run drizzle -- pull",
     "drizzle:push": "npm run drizzle -- push",
     "drizzle:studio": "npm run drizzle -- studio",
     "drizzle:check": "npm run drizzle -- check",
     "drizzle:up": "npm run drizzle -- up",
-    "drizzle:seed": "tsx src/seed.ts seed",
-    "drizzle:reset": "tsx src/seed.ts reset"
+    "drizzle:seed": "tsx src/db.ts seed",
+    "drizzle:reset": "tsx src/db.ts reset",
+    "drizzle:gms": "npm run drizzle:generate && npm run drizzle:migrate && npm run drizzle:seed"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -80,6 +80,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.39.1",
+    "@faker-js/faker": "^10.1.0",
     "@nestjs/cli": "^11.0.10",
     "@nestjs/schematics": "^11.0.9",
     "@nestjs/testing": "^11.1.9",

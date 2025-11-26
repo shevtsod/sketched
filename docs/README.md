@@ -1,3 +1,5 @@
-# Table of Contents
+# Documentation
+
+## Table of Contents
 
 - [Database](./database.md)

@@ -5,6 +5,10 @@ FROM node:24-alpine AS base
 
 LABEL org.opencontainers.image.authors="Daniel Shevtsov"
 
+# Set app version
+ARG VERSION
+ENV VERSION=${VERSION:-0.0.0}
+
 # Set working directory
 WORKDIR /app
 

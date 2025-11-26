@@ -1,13 +1,8 @@
 services:
   # Sketched client
   client:
-    image: "shevtsod/sketched-client:latest"
+    image: "shevtsod/sketched-client:${VERSION:-latest}"
     restart: "unless-stopped"
-    pull_policy: "build"
-    # Build image from Dockerfile
-    build:
-      context: "packages/client"
-      target: "development"
     # Load environment variables from file
     env_file:
       - path: ".env"
@@ -20,13 +15,8 @@ services:
 
   # Sketched server
   server:
-    image: "shevtsod/sketched-server:latest"
+    image: "shevtsod/sketched-server:${VERSION:-latest}"
     restart: "unless-stopped"
-    pull_policy: "build"
-    # Build image from Dockerfile
-    build:
-      context: "packages/server"
-      target: "development"
     # Load environment variables from file
     env_file:
       - path: ".env"

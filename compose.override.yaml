@@ -1,0 +1,19 @@
+# compose.yaml overrides for local development
+services:
+  # Sketched client
+  client:
+    image: "shevtsod/sketched-client:latest"
+    pull_policy: "build"
+    # Build image from Dockerfile
+    build:
+      context: "packages/client"
+      target: "development"
+
+  # Sketched server
+  server:
+    image: "shevtsod/sketched-server:latest"
+    pull_policy: "build"
+    # Build image from Dockerfile
+    build:
+      context: "packages/server"
+      target: "development"

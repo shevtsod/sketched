@@ -2,6 +2,7 @@ import z from 'zod';
 
 // https://zod.dev/
 const EnvSchema = z.object({
+  VERSION: z.string().default('0.0.0'),
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
     .default('development'),

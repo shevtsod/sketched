@@ -30,17 +30,7 @@
     "cli": "nest start --entryFile cli --",
     "cli:dev": "nest start --watch --entryFile cli --",
     "cli:prod": "node dist/cli",
-    "drizzle": "drizzle-kit",
-    "drizzle:generate": "drizzle-kit generate",
-    "drizzle:migrate": "drizzle-kit migrate",
-    "drizzle:pull": "drizzle-kit pull",
-    "drizzle:push": "drizzle-kit push",
-    "drizzle:studio": "drizzle-kit studio",
-    "drizzle:check": "drizzle-kit check",
-    "drizzle:up": "drizzle-kit up",
-    "drizzle:seed": "tsx src/db.ts seed",
-    "drizzle:reset": "tsx src/db.ts reset",
-    "drizzle:gms": "drizzle-kit generate && drizzle-kit migrate && drizzle-kit seed"
+    "db": "drizzle-kit"
   },
   "jest": {
     "moduleFileExtensions": [

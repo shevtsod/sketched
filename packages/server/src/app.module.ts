@@ -5,8 +5,8 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { LoggerModule } from 'nestjs-pino';
 import { join } from 'path';
 import { CliModule } from './cli/cli.module';
-import { validate } from './config/env';
-import { httpLogger } from './config/logger';
+import { getEnv } from './config/env';
+import { createHttpLogger, createLogger } from './config/logger';
 import { ResourcesModule } from './resources/resources.module';
 
 export interface AppModuleOptions {
@@ -35,9 +35,13 @@ export class AppModule {
       module: AppModule,
       imports: [
         // https://docs.nestjs.com/techniques/configuration
-        ConfigModule.forRoot({ validate }),
+        ConfigModule.forRoot({ validate: getEnv }),
         // https://docs.nestjs.com/techniques/logger
-        LoggerModule.forRoot({ pinoHttp: httpLogger }),
+        LoggerModule.forRoot({
+          pinoHttp: createHttpLogger({
+            logger: createLogger({ sync: cli }),
+          }),
+        }),
         // https://docs.nestjs.com/graphql/quick-start
         GraphQLModule.forRootAsync<ApolloDriverConfig>({
           driver: ApolloDriver,
@@ -45,7 +49,7 @@ export class AppModule {
           inject: [ConfigService],
           useFactory: (configService: ConfigService) => ({
             playground: false,
-            graphiql: configService.get<string>('NODE_ENV') === 'development',
+            graphiql: configService.get<boolean>('isDevOrTest'),
             autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
             // https://docs.nestjs.com/graphql/subscriptions
             subscriptions: {

@@ -1,8 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { DrizzleQueryError } from 'drizzle-orm';
-import { seed } from 'drizzle-seed';
 import { CommandRunner, SubCommand } from 'nest-commander';
-import { schema } from '../../../db';
 import { DbService } from '../../../db/db.service';
 
 @SubCommand({
@@ -20,23 +18,19 @@ export class SeedCommand extends CommandRunner {
     _passedParams: string[],
     _options?: Record<string, any>,
   ): Promise<void> {
-    this.logger.log(`Seeding database ...`);
-
     try {
-      // https://orm.drizzle.team/docs/seed-overview
-      await seed(this.dbService.db, schema);
+      await this.dbService.seed();
     } catch (err) {
       if (err instanceof DrizzleQueryError) {
-        this.logger.debug({ message: err.message });
-        this.logger.warn(
-          { cause: err.cause?.message },
-          'Error while seeding database, likely due to existing data. Run "npm run drizzle:reset" to remove existing data.',
-        );
+        this.logger.debug(err.message);
+        this.logger.warn({
+          msg: 'Failed seeding database, likely due to existing data. Run "npm run cli db reset" to remove existing data.',
+          cause: err.cause?.message,
+        });
       } else {
+        this.logger.error({ err });
         throw err;
       }
     }
-
-    this.logger.log('Finished seeding database');
   }
 }

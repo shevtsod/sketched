@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { schema } from '.';
+import { EnvSchemaType } from '../config/env';
 import { DbService } from './db.service';
 
 jest.mock('pg');
@@ -10,13 +11,13 @@ jest.mock('drizzle-orm/node-postgres', () => ({
   drizzle: jest.fn().mockReturnValue('mockDrizzle'),
 }));
 
-const mockEnv = {
-  NODE_ENV: 'production',
+const mockEnv: Partial<EnvSchemaType> = {
   DB_HOST: 'localhost',
   DB_PORT: 5432,
   DB_NAME: 'testdb',
   DB_USER: 'testuser',
   DB_PASSWORD: 'secret',
+  isDevOrTest: false,
 };
 
 const mockConfigService = {
@@ -26,7 +27,7 @@ const mockConfigService = {
 };
 
 describe('DbService', () => {
-  let dbService: DbService;
+  let service: DbService;
   let configService: jest.Mocked<ConfigService>;
 
   beforeEach(async () => {
@@ -40,7 +41,7 @@ describe('DbService', () => {
       ],
     }).compile();
 
-    dbService = app.get<DbService>(DbService);
+    service = app.get<DbService>(DbService);
     configService = app.get<jest.Mocked<ConfigService>>(ConfigService);
   });
 
@@ -59,16 +60,16 @@ describe('DbService', () => {
       expect.objectContaining({ schema }),
     );
 
-    expect(dbService.db).toBe('mockDrizzle');
+    expect(service.db).toBe('mockDrizzle');
   });
 
   it('should disable ssl in development', () => {
     configService.get.mockImplementation((key: string) => {
-      if (key === 'NODE_ENV') return 'development';
+      if (key === 'isDevOrTest') return true;
       return mockEnv[key];
     });
 
-    dbService = new DbService(configService);
+    service = new DbService(configService);
 
     expect(Pool).toHaveBeenCalledWith(expect.objectContaining({ ssl: false }));
   });

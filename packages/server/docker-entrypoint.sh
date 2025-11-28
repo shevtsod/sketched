@@ -1,23 +1,26 @@
 #!/bin/sh
 set -euo pipefail
 
-echo "Waiting for services ..."
+# Set environment variable defaults based on .env.example
+NODE_ENV="${NODE_ENV:-development}"
 
-CACHE_URL="${CACHE_HOST:-127.0.0.1}:${CACHE_PORT:-6379}"
-echo "Waiting for cache at \"${CACHE_URL}\" ..."
-./wait-for "${CACHE_URL}"
+DB_HOST="${DB_HOST:-127.0.0.1}"
+DB_PORT="${DB_PORT:-5432}"
 
-DB_URL="${DB_HOST:-127.0.0.1}:${DB_PORT:-5432}"
-echo "Waiting for database at \"${DB_URL}\" ..."
-./wait-for "${DB_URL}"
+CACHE_HOST="${CACHE_HOST:-127.0.0.1}"
+CACHE_PORT="${CACHE_PORT:-6379}"
 
-echo "Running database migrations ..."
-npm run drizzle:migrate
+echo "Waiting for database at \"$DB_HOST:$DB_PORT\" ..."
+./wait-for "$DB_HOST:$DB_PORT"
+
+echo "Waiting for cache at \"$CACHE_HOST:$CACHE_PORT\" ..."
+./wait-for "$CACHE_HOST:$CACHE_PORT"
+
+npm run cli db migrate
 
 # Seed database only in development and test environments
 if [ "$NODE_ENV" = "development" ] || [ "$NODE_ENV" = "test" ]; then
-  echo "NODE_ENV=\"$NODE_ENV\", seeding database ..."
-  npm run drizzle:seed
+  npm run cli db seed
 fi
 
 # Start the app

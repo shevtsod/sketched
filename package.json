@@ -17,16 +17,17 @@
     "packages/*"
   ],
   "scripts": {
-    "build:client": "npm --workspace client run build",
-    "build:server": "npm --workspace server run build",
+    "build:client": "npm -w client run build",
+    "build:server": "npm -w server run build",
     "build": "conc -c auto 'npm:build:client' 'npm:build:server'",
-    "dev:client": "npm --workspace client run dev",
-    "dev:server": "npm --workspace server run start:debug",
+    "dev:client": "npm -w client run dev",
+    "dev:server": "npm -w server run start:debug",
     "dev": "conc -c auto 'npm:dev:client' 'npm:dev:server'",
-    "test:client": "npm --workspace client run test:cov",
-    "test:server": "npm --workspace server run test:cov",
-    "test:server:e2e": "npm --workspace server run test:e2e",
-    "test": "conc -c auto 'npm:test:client' 'npm:test:server' 'npm:test:server:e2e'"
+    "test:client": "npm -w client run test:cov",
+    "test:server": "npm -w server run test:cov",
+    "test:server:e2e": "npm -w server run test:e2e",
+    "test": "conc -c auto 'npm:test:client' 'npm:test:server' 'npm:test:server:e2e'",
+    "cli": "npm -w server run cli"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

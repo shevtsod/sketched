@@ -1,29 +1,56 @@
+import { IncomingMessage, ServerResponse } from 'http';
 import pino from 'pino';
-import { pinoHttp } from 'pino-http';
+import { Options, pinoHttp } from 'pino-http';
+import pinoPretty from 'pino-pretty';
 import { env } from './env';
 
 const { LOG_LEVEL, NODE_ENV } = env;
 
-// https://github.com/pinojs/pino/blob/main/docs/transports.md
-const transports: pino.TransportSingleOptions[] = [];
-
-// https://github.com/pinojs/pino-pretty
-if (NODE_ENV === 'development') {
-  transports.push({
-    target: 'pino-pretty',
-    options: { colorize: true },
-  });
+interface LoggerOptions {
+  sync?: boolean;
 }
 
-// https://github.com/pinojs/pino
-export const logger = pino({
-  level: LOG_LEVEL,
-  transport: {
-    targets: transports,
-  },
-});
+/**
+ * Creates a new logger instance with the given option overrides
+ *
+ * @returns logger instance
+ */
+export function createLogger(options?: LoggerOptions) {
+  const streams: pino.StreamEntry[] = [];
 
-// https://github.com/pinojs/pino-http
-export const httpLogger = pinoHttp({
-  logger,
-});
+  // https://github.com/pinojs/pino-pretty
+  streams.push({
+    level: LOG_LEVEL,
+    stream:
+      NODE_ENV === 'development'
+        ? pinoPretty({
+            colorize: true,
+            ...options,
+          })
+        : pino.destination({
+            ...options,
+          }),
+  });
+
+  // https://github.com/pinojs/pino
+  return pino(
+    {
+      level: LOG_LEVEL,
+      ...options,
+    },
+    pino.multistream(streams),
+  );
+}
+
+/**
+ * Creates a new HTTP logger instance with the given option overrides
+ *
+ * @returns logger instance
+ */
+export function createHttpLogger(
+  opts?: Options<IncomingMessage, ServerResponse<IncomingMessage>, never>,
+  stream?: pino.DestinationStream,
+) {
+  // https://github.com/pinojs/pino-http
+  return pinoHttp(opts, stream);
+}

@@ -16,7 +16,11 @@ async function bootstrap() {
   const logger = app.get(Logger);
   app.useLogger(logger);
 
-  logger.log(`Sketched Server ${env.VERSION} (${env.NODE_ENV}) CLI`);
+  logger.log({
+    msg: 'Sketched Server CLI',
+    environment: env.NODE_ENV,
+    version: env.VERSION,
+  });
 
   await CommandFactory.runApplication(app);
 }

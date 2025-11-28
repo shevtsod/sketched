@@ -1,6 +1,4 @@
-import { relations } from 'drizzle-orm';
 import { bigint, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
-import { account } from './account';
 
 export const user = pgTable('user', {
   id: bigint({ mode: 'number' }).generatedAlwaysAsIdentity().primaryKey(),
@@ -12,7 +10,3 @@ export const user = pgTable('user', {
     .notNull()
     .$onUpdate(() => new Date()),
 });
-
-export const userRelations = relations(user, ({ many }) => ({
-  account: many(account),
-}));

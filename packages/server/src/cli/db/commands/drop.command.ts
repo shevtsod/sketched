@@ -1,12 +1,10 @@
 import { Logger } from '@nestjs/common';
-import { reset } from 'drizzle-seed';
 import {
   CommandRunner,
   InquirerService,
   Option,
   SubCommand,
 } from 'nest-commander';
-import { schema } from '../../../db';
 import { DbService } from '../../../db/db.service';
 
 @SubCommand({
@@ -27,24 +25,27 @@ export class DropCommand extends CommandRunner {
     _passedParams: string[],
     options?: Record<string, any>,
   ): Promise<void> {
-    let confirm = options?.confirm;
+    try {
+      let confirm = options?.confirm;
 
-    if (!confirm) {
-      confirm = (
-        await this.inquirerService.ask<{ confirm: boolean }>(
-          'confirm-questions',
-          undefined,
-        )
-      ).confirm;
+      if (!confirm) {
+        confirm = (
+          await this.inquirerService.ask<{ confirm: boolean }>(
+            'confirm-questions',
+            undefined,
+          )
+        ).confirm;
+      }
+
+      if (!confirm) {
+        throw new Error('Cancelled');
+      }
+
+      await this.dbService.drop();
+    } catch (err) {
+      this.logger.error({ err });
+      throw err;
     }
-
-    if (!confirm) {
-      throw new Error('Cancelled');
-    }
-
-    this.logger.log(`Dropping database ...`);
-    await reset(this.dbService.db, schema);
-    this.logger.log('Finished dropping database');
   }
 
   @Option({

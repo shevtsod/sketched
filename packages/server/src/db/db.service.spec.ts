@@ -2,8 +2,8 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import { schema } from '.';
 import { DbService } from './db.service';
-import * as schema from './schema';
 
 jest.mock('pg');
 jest.mock('drizzle-orm/node-postgres', () => ({

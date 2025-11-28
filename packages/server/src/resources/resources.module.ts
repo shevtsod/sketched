@@ -6,6 +6,5 @@ const resourceModules = [UsersModule];
 
 @Module({
   imports: [...resourceModules],
-  exports: [...resourceModules],
 })
 export class ResourcesModule {}

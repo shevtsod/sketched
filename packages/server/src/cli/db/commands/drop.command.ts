@@ -10,11 +10,11 @@ import { schema } from '../../../db';
 import { DbService } from '../../../db/db.service';
 
 @SubCommand({
-  name: 'reset',
-  description: 'Removes all existing data in all tables',
+  name: 'drop',
+  description: 'Removes all existing data and tables',
 })
-export class ResetCommand extends CommandRunner {
-  private readonly logger = new Logger(ResetCommand.name);
+export class DropCommand extends CommandRunner {
+  private readonly logger = new Logger(DropCommand.name);
 
   constructor(
     private readonly dbService: DbService,
@@ -42,9 +42,9 @@ export class ResetCommand extends CommandRunner {
       throw new Error('Cancelled');
     }
 
-    this.logger.log(`Resetting database ...`);
+    this.logger.log(`Dropping database ...`);
     await reset(this.dbService.db, schema);
-    this.logger.log('Finished resetting database');
+    this.logger.log('Finished dropping database');
   }
 
   @Option({

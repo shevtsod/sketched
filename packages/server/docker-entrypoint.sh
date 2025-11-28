@@ -13,7 +13,12 @@ echo "Waiting for database at \"${DB_URL}\" ..."
 
 echo "Running database migrations ..."
 npm run drizzle:migrate
-npm run drizzle:seed
+
+# Seed database only in development and test environments
+if [ "$NODE_ENV" = "development" ] || [ "$NODE_ENV" = "test" ]; then
+  echo "NODE_ENV=\"$NODE_ENV\", seeding database ..."
+  npm run drizzle:seed
+fi
 
 # Start the app
 exec "$@"

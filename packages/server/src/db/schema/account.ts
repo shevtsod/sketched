@@ -1,4 +1,3 @@
-import { relations } from 'drizzle-orm';
 import { bigint, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 import { user } from './user';
 
@@ -21,10 +20,3 @@ export const account = pgTable('account', {
     .notNull()
     .$onUpdate(() => new Date()),
 });
-
-export const accountRelations = relations(account, ({ one }) => ({
-  user: one(user, {
-    fields: [account.userId],
-    references: [user.id],
-  }),
-}));

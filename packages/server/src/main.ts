@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger } from 'nestjs-pino';
+import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { env } from './config/env';
 
@@ -18,6 +18,7 @@ async function bootstrap() {
   //https://github.com/iamolegga/nestjs-pino
   const logger = app.get(Logger);
   app.useLogger(logger);
+  app.useGlobalInterceptors(new LoggerErrorInterceptor());
 
   await app.listen(env.PORT);
 

@@ -16,10 +16,9 @@ async function bootstrap() {
   const logger = app.get(Logger);
   app.useLogger(logger);
 
+  logger.log(`Sketched Server ${env.VERSION} (${env.NODE_ENV}) CLI`);
+
   await CommandFactory.runApplication(app);
-  logger.log(
-    `Sketched Server ${env.VERSION} (${env.NODE_ENV}) running in CLI mode`,
-  );
 }
 
 void bootstrap();

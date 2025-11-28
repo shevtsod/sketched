@@ -4,10 +4,11 @@ A web game about drawing things from memory!
 
 ## Getting Started
 
-Run the app locally using [Docker Compose](https://docs.docker.com/compose/) and access it at <http://localhost:5173>.
+Run locally using [Docker Compose](https://docs.docker.com/compose/):
 
 ```shell
-docker compose up
+npm i
+docker compose up # http://localhost:5173
 ```
 
 > [!CAUTION]

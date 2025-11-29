@@ -1,12 +1,10 @@
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { DynamicModule, ForwardReference, Module, Type } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
+import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
-import { join } from 'path';
 import { CliModule } from './cli/cli.module';
 import { getEnv } from './config/env';
 import { createHttpLogger, createLogger } from './config/logger';
+import { GraphQLModule } from './graphql/graphql.module';
 import { ResourcesModule } from './resources/resources.module';
 
 export interface AppModuleOptions {
@@ -43,24 +41,9 @@ export class AppModule {
             logger: createLogger({ sync: cli }),
           }),
         }),
+        // GraphQL API
         // https://docs.nestjs.com/graphql/quick-start
-        GraphQLModule.forRootAsync<ApolloDriverConfig>({
-          driver: ApolloDriver,
-          imports: [ConfigModule],
-          inject: [ConfigService],
-          useFactory: (configService: ConfigService) => ({
-            playground: false,
-            graphiql: configService.get<boolean>('isDevOrTest')
-              ? { url: `graphql` }
-              : false,
-            autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-            // https://docs.nestjs.com/graphql/subscriptions
-            subscriptions: {
-              'graphql-ws': true,
-            },
-            useGlobalPrefix: true,
-          }),
-        }),
+        GraphQLModule,
         // Application resources (users, etc.)
         ResourcesModule,
         // Conditionally-imported modules

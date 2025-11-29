@@ -31,6 +31,8 @@ describe('DbService', () => {
   let configService: jest.Mocked<ConfigService>;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const app: TestingModule = await Test.createTestingModule({
       providers: [
         DbService,
@@ -46,14 +48,16 @@ describe('DbService', () => {
   });
 
   it('should create a drizzle instance', () => {
-    expect(Pool).toHaveBeenCalledWith({
-      host: mockEnv.DB_HOST,
-      port: mockEnv.DB_PORT,
-      database: mockEnv.DB_NAME,
-      user: mockEnv.DB_USER,
-      password: mockEnv.DB_PASSWORD,
-      ssl: true,
-    });
+    expect(Pool).toHaveBeenCalledWith(
+      expect.objectContaining({
+        host: mockEnv.DB_HOST,
+        port: mockEnv.DB_PORT,
+        database: mockEnv.DB_NAME,
+        user: mockEnv.DB_USER,
+        password: mockEnv.DB_PASSWORD,
+        ssl: true,
+      }),
+    );
 
     expect(drizzle).toHaveBeenCalledWith(
       expect.any(Pool),

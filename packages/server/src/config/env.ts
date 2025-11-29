@@ -53,7 +53,7 @@ const EnvSchema = z
     /** Storage bucket name */
     STORAGE_BUCKET: z.string().default('sketched'),
     /** Expiration time for signed URLs, in seconds */
-    STORAGE_URL_EXPIRATION: z.number().default(3600),
+    STORAGE_URL_EXPIRATION: z.coerce.number().default(3600),
   })
   // Set computed values
   .transform((val) => ({

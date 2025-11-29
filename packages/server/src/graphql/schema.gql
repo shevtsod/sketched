@@ -3,14 +3,14 @@
 # ------------------------------------------------------
 
 type User {
-  """Database ID"""
+  """Database ID (PK)"""
   id: ID!
-
-  """Display name"""
-  name: String!
 
   """Email address"""
   email: String!
+
+  """Display name"""
+  name: String!
 
   """Image URL"""
   image: String
@@ -39,14 +39,14 @@ type Mutation {
 }
 
 input CreateUserInput {
-  name: String!
   email: String!
+  name: String!
   image: String!
 }
 
 input UpdateUserInput {
-  name: String
   email: String
+  name: String
   image: String
   id: ID!
 }

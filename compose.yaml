@@ -2,6 +2,8 @@ services:
   # Sketched client
   client:
     image: "shevtsod/sketched-client:${VERSION:-latest}"
+    depends_on:
+      - server
     restart: "unless-stopped"
     # Load environment variables from file
     env_file:
@@ -16,6 +18,10 @@ services:
   # Sketched server
   server:
     image: "shevtsod/sketched-server:${VERSION:-latest}"
+    depends_on:
+      - db
+      - cache
+      - objects
     restart: "unless-stopped"
     # Load environment variables from file
     env_file:
@@ -56,12 +62,14 @@ services:
     # substitute env vars and run valkey-server
     # note: valkey image does not include envsubst
     entrypoint: >
-      sh -c 'sed -e "s/__CACHE_PORT__/${CACHE_PORT:-6379}/g" \
-        -e "s/__CACHE_USER__/${CACHE_USER:-sketched}/g" \
-        -e "s/__CACHE_PASSWORD__/${CACHE_PASSWORD:-change-me}/g" \
-        /usr/local/etc/valkey/valkey.conf.template > \
-        /usr/local/etc/valkey/valkey.conf && \
-        valkey-server /usr/local/etc/valkey/valkey.conf'
+      /bin/sh -c '
+      sed -e "s/__CACHE_PORT__/${CACHE_PORT:-6379}/g"
+      -e "s/__CACHE_USER__/${CACHE_USER:-sketched}/g"
+      -e "s/__CACHE_PASSWORD__/${CACHE_PASSWORD:-change-me}/g"
+      /usr/local/etc/valkey/valkey.conf.template >
+      /usr/local/etc/valkey/valkey.conf &&
+      valkey-server /usr/local/etc/valkey/valkey.conf
+      '
     ports:
       - "${CACHE_PORT:-6379}:6379"
     volumes:
@@ -70,6 +78,38 @@ services:
       # Persist cache data
       - "valkey_data:/data"
 
+  # object store
+  # https://hub.docker.com/r/minio/minio
+  objects:
+    image: "minio/minio:RELEASE.2025-09-07T16-13-09Z"
+    restart: "unless-stopped"
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      # web UI
+      # - "9001:9001"
+    volumes:
+      # Persist object store data
+      - "minio_data:/data"
+
+  # init object store via cli
+  # https://hub.docker.com/r/minio/mc/
+  objects-init:
+    image: "minio/mc:RELEASE.2025-08-13T08-35-41Z"
+    depends_on:
+      - objects
+    restart: "no"
+    # create user and bucket
+    entrypoint: >
+      /bin/sh -c '
+      sleep 5 &&
+      mc alias set minio http://objects:9000 minioadmin minioadmin &&
+      mc mb minio/${STORAGE_BUCKET:-sketched} || true &&
+      mc admin user add minio "${STORAGE_ACCESS_KEY_ID:-sketched}" "${STORAGE_SECRET_ACCESS_KEY:-change-me}" &&
+      mc admin policy attach minio readwrite --user="${STORAGE_ACCESS_KEY_ID:-sketched}"
+      '
+
 volumes:
   postgres_data:
   valkey_data:
+  minio_data:

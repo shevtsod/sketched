@@ -41,6 +41,19 @@ const EnvSchema = z
     CACHE_USER: z.string().default('sketched'),
     /** Cache password */
     CACHE_PASSWORD: z.string().default('change-me'),
+
+    /** Storage base URL */
+    STORAGE_ENDPOINT: z.string().default('http://127.0.0.1:9000'),
+    /** Region where bucket is hosted */
+    STORAGE_REGION: z.string().default('us-east-1'),
+    /** Storage access key ID */
+    STORAGE_ACCESS_KEY_ID: z.string().default('sketched'),
+    /** Storage secret access key */
+    STORAGE_SECRET_ACCESS_KEY: z.string().default('change-me'),
+    /** Storage bucket name */
+    STORAGE_BUCKET: z.string().default('sketched'),
+    /** Expiration time for signed URLs, in seconds */
+    STORAGE_URL_EXPIRATION: z.number().default(3600),
   })
   // Set computed values
   .transform((val) => ({

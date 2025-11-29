@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { AppModule } from './app.module';
@@ -8,6 +9,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule.register(), {
     bufferLogs: true,
   });
+
+  // https://docs.nestjs.com/techniques/validation
+  app.useGlobalPipes(
+    new ValidationPipe({
+      // transform objects to DTO instances
+      transform: true,
+    }),
+  );
 
   // https://docs.nestjs.com/faq/global-prefix
   app.setGlobalPrefix(env.BASE_PATH);

@@ -16,11 +16,16 @@ const config: DrizzleConfig<typeof schema> = {
   casing: 'snake_case',
 };
 
+/**
+ * Provides access to the SQL database for querying
+ *
+ * @see {@link https://orm.drizzle.team/docs/overview}
+ */
 @Injectable()
 export class DbService implements OnModuleDestroy {
   private readonly logger = new Logger(DbService.name);
 
-  private pool: Pool;
+  private readonly pool: Pool;
   readonly db: DbType;
 
   constructor(private readonly configService: ConfigService) {

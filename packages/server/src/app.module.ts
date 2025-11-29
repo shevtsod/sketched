@@ -39,6 +39,7 @@ export class AppModule {
         // https://docs.nestjs.com/techniques/logger
         LoggerModule.forRoot({
           pinoHttp: createHttpLogger({
+            // use synchronous logger in CLI (so prompts appear in order)
             logger: createLogger({ sync: cli }),
           }),
         }),

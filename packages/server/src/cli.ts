@@ -9,6 +9,8 @@ async function bootstrap() {
     AppModule.register({ cli: true }),
   );
 
+  // NOTE: some customizations in main.ts not supported for CommandFactory app
+
   // https://docs.nestjs.com/fundamentals/lifecycle-events#application-shutdown
   app.enableShutdownHooks();
 

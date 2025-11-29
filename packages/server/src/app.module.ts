@@ -50,12 +50,15 @@ export class AppModule {
           inject: [ConfigService],
           useFactory: (configService: ConfigService) => ({
             playground: false,
-            graphiql: configService.get<boolean>('isDevOrTest'),
+            graphiql: configService.get<boolean>('isDevOrTest')
+              ? { url: `graphql` }
+              : false,
             autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
             // https://docs.nestjs.com/graphql/subscriptions
             subscriptions: {
               'graphql-ws': true,
             },
+            useGlobalPrefix: true,
           }),
         }),
         // Application resources (users, etc.)

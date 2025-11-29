@@ -32,14 +32,13 @@ async function bootstrap() {
   await app.listen(env.PORT);
 
   const url = new URL(`http://${env.HOST}:${env.PORT}/${env.BASE_PATH}`);
-  const graphqlUrl = new URL('graphql', url);
 
   logger.log({
     msg: 'Sketched Server',
     environment: env.NODE_ENV,
     version: env.VERSION,
     url,
-    graphqlUrl,
+    graphqlUrl: `${url}/graphql`,
   });
 }
 

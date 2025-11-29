@@ -145,3 +145,11 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node,dotenv
 
+# Docker Compose overrides
+compose.*.yml
+compose.*.yaml
+docker-compose.*.yml
+docker-compose.*.yaml
+
+# Keep compose.override.yaml
+!compose.override.yaml

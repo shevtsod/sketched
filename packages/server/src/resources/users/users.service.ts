@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { eq, inArray } from 'drizzle-orm';
 import { DbService } from '../../db/db.service';
 import { user } from '../../db/schema';
-import { CreateUserInput } from './create-user.input';
-import { UpdateUserInput } from './update-user.input';
-import { User } from './user.entity';
+import { CreateUserInput } from './dto/create-user.input';
+import { UpdateUserInput } from './dto/update-user.input';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {

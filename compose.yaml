@@ -2,15 +2,12 @@ services:
   # Sketched client
   client:
     image: "shevtsod/sketched-client:${VERSION:-latest}"
+    restart: "unless-stopped"
     depends_on:
       - server
-    restart: "unless-stopped"
-    # Load environment variables from file
-    env_file:
-      - path: ".env"
-        required: false
-    ports:
-      - "5173:5173"
+    # Override environment variables
+    networks:
+      - frontend
     volumes:
       # Mount source code for hot reload
       - "./packages/client/src:/app/src"
@@ -18,23 +15,22 @@ services:
   # Sketched server
   server:
     image: "shevtsod/sketched-server:${VERSION:-latest}"
+    restart: "unless-stopped"
     depends_on:
       - db
       - cache
-      - objects
-    restart: "unless-stopped"
     # Load environment variables from file
     env_file:
       - path: ".env"
         required: false
     # Override environment variables
     environment:
-      DB_HOST: db
-      CACHE_HOST: cache
-    ports:
-      - "3000:3000"
-      # Node.js debugger
-      - "9229:9229"
+      DB_HOST: "db"
+      CACHE_HOST: "cache"
+      STORAGE_ENDPOINT: "http://objects:9000"
+    networks:
+      - frontend
+      - backend
     volumes:
       # Mount source code for hot reload
       - "./packages/server/src:/app/src"
@@ -48,8 +44,8 @@ services:
       POSTGRES_DB: "${DB_NAME:-sketched}"
       POSTGRES_USER: "${DB_USER:-sketched}"
       POSTGRES_PASSWORD: "${DB_PASSWORD:-change-me}"
-    ports:
-      - "${DB_PORT:-5432}:5432"
+    networks:
+      - backend
     volumes:
       # Persist database data
       - "postgres_data:/var/lib/postgresql/data"
@@ -70,8 +66,8 @@ services:
       /usr/local/etc/valkey/valkey.conf &&
       valkey-server /usr/local/etc/valkey/valkey.conf
       '
-    ports:
-      - "${CACHE_PORT:-6379}:6379"
+    networks:
+      - backend
     volumes:
       # https://valkey.io/topics/valkey.conf/
       - "./docker/valkey/valkey.conf.template:/usr/local/etc/valkey/valkey.conf.template:ro"
@@ -84,10 +80,8 @@ services:
     image: "minio/minio:RELEASE.2025-09-07T16-13-09Z"
     restart: "unless-stopped"
     command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000"
-      # web UI
-      # - "9001:9001"
+    networks:
+      - backend
     volumes:
       # Persist object store data
       - "minio_data:/data"
@@ -102,14 +96,28 @@ services:
     # create user and bucket
     entrypoint: >
       /bin/sh -c '
+      echo "Waiting for MinIO ..." &&
       sleep 5 &&
       mc alias set minio http://objects:9000 minioadmin minioadmin &&
       mc mb minio/${STORAGE_BUCKET:-sketched} || true &&
       mc admin user add minio "${STORAGE_ACCESS_KEY_ID:-sketched}" "${STORAGE_SECRET_ACCESS_KEY:-change-me}" &&
       mc admin policy attach minio readwrite --user="${STORAGE_ACCESS_KEY_ID:-sketched}"
       '
+    networks:
+      - backend
+
+networks:
+  # client-facing services network
+  frontend:
+    driver: bridge
+  # internal services network
+  backend:
+    driver: bridge
 
 volumes:
+  # database data
   postgres_data:
+  # cache data
   valkey_data:
+  # object store data
   minio_data:

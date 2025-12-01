@@ -1,40 +1,66 @@
 import { Injectable } from '@nestjs/common';
-import { eq, inArray } from 'drizzle-orm';
-import { DbService } from '../../db/db.service';
-import { user } from '../../db/schema';
-import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
+import { SQL } from 'drizzle-orm';
+import {
+  DbColumn,
+  DbInsertValue,
+  DbService,
+  DbUpdateSetSource,
+} from '../../db/db.service';
+import { users } from '../../db/schema';
 import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly dbService: DbService) {}
 
-  create(...createUserInputs: CreateUserInput[]): Promise<User[]> {
-    return this.dbService.db.insert(user).values(createUserInputs).returning();
+  idColumn(id: number): DbColumn {
+    return users.id;
   }
 
-  findAll(): Promise<User[]> {
-    return this.dbService.db.query.user.findMany();
+  create(...values: DbInsertValue<typeof users>[]): Promise<User[]> {
+    return this.dbService.db.insert(users).values(values).returning();
   }
 
-  findOne(id: number): Promise<User | undefined> {
-    return this.dbService.db.query.user.findFirst({ where: eq(user.id, id) });
+  findMany({
+    where,
+    orderBy,
+    limit,
+  }: {
+    where?: SQL;
+    orderBy?: (DbColumn | SQL | SQL.Aliased)[];
+    limit?: number;
+  } = {}): Promise<[User[], number]> {
+    return this.dbService.db.transaction(async (tx) => {
+      const query = tx.select().from(users).where(where);
+      if (limit !== undefined) query.limit(limit);
+      if (orderBy !== undefined) query.orderBy(...orderBy);
+      return [await query, await tx.$count(users, where)];
+    });
   }
 
-  update(id: number, updateUserInput: UpdateUserInput): Promise<User> {
-    return this.dbService.db
-      .update(user)
-      .set(updateUserInput)
-      .where(eq(user.id, id))
-      .returning()
-      .then((res) => res[0]);
+  findOne({
+    where,
+    orderBy,
+  }: {
+    where?: SQL;
+    orderBy?: (DbColumn | SQL | SQL.Aliased)[];
+  } = {}): Promise<User | undefined> {
+    const query = this.dbService.db.select().from(users).where(where).limit(1);
+    if (orderBy !== undefined) query.orderBy(...orderBy);
+    return query.then((res) => res[0]);
   }
 
-  remove(...ids: number[]): Promise<User[]> {
-    return this.dbService.db
-      .delete(user)
-      .where(inArray(user.id, ids))
-      .returning();
+  update({
+    set,
+    where,
+  }: {
+    set: DbUpdateSetSource<typeof users>;
+    where: SQL;
+  }): Promise<User[]> {
+    return this.dbService.db.update(users).set(set).where(where).returning();
+  }
+
+  delete({ where }: { where: SQL }): Promise<User[]> {
+    return this.dbService.db.delete(users).where(where).returning();
   }
 }

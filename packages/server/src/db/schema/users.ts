@@ -1,6 +1,6 @@
 import { bigint, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
-export const user = pgTable('user', {
+export const users = pgTable('users', {
   /** Database ID (PK) */
   id: bigint({ mode: 'number' }).generatedAlwaysAsIdentity().primaryKey(),
   /**  Email address */

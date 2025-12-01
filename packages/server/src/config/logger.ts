@@ -36,6 +36,10 @@ export function createLogger(options?: LoggerOptions) {
   return pino(
     {
       level: LOG_LEVEL,
+      // Censor sensitive information in logs
+      redact: {
+        paths: ['req.headers.authorization', 'req.headers.cookie'],
+      },
       ...options,
     },
     pino.multistream(streams),

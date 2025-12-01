@@ -1,14 +1,44 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DrizzleConfig, sql } from 'drizzle-orm';
-import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
+import {
+  ColumnBaseConfig,
+  ColumnDataType,
+  DrizzleConfig,
+  ExtractTablesWithRelations,
+  sql,
+} from 'drizzle-orm';
+import {
+  drizzle,
+  NodePgDatabase,
+  NodePgTransaction,
+} from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
+import {
+  PgColumn,
+  PgInsertValue,
+  PgTable,
+  PgUpdateSetSource,
+  TableConfig,
+} from 'drizzle-orm/pg-core';
 import { reset, seed } from 'drizzle-seed';
 import { Pool } from 'pg';
 import { schema } from '.';
 
-/** ORM type with schema definition */
+/** ORM types with schema definition */
 export type DbType = NodePgDatabase<typeof schema>;
+export type DbTransactionType = NodePgTransaction<
+  typeof schema,
+  ExtractTablesWithRelations<typeof schema>
+>;
+export type DbTable<T extends TableConfig = TableConfig> = PgTable<T>;
+export type DbInsertValue<T extends DbTable> = PgInsertValue<T>;
+export type DbUpdateSetSource<T extends DbTable> = PgUpdateSetSource<T>;
+export type DbColumn<
+  T extends ColumnBaseConfig<ColumnDataType, string> = ColumnBaseConfig<
+    ColumnDataType,
+    string
+  >,
+> = PgColumn<T>;
 
 // https://orm.drizzle.team/docs/connect-overview
 const config: DrizzleConfig<typeof schema> = {

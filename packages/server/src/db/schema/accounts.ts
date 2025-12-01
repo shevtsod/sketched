@@ -1,12 +1,12 @@
 import { bigint, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
-import { user } from './user';
+import { users } from './users';
 
-export const account = pgTable('account', {
+export const accounts = pgTable('accounts', {
   /** Database ID (PK) */
   id: bigint({ mode: 'number' }).generatedAlwaysAsIdentity().primaryKey(),
   /** User ID (FK) */
   userId: bigint({ mode: 'number' })
-    .references(() => user.id, { onDelete: 'cascade' })
+    .references(() => users.id, { onDelete: 'cascade' })
     .notNull(),
   /** Account provider ID */
   providerId: varchar({ length: 32 }).notNull(),

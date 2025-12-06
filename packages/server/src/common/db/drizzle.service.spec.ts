@@ -1,12 +1,19 @@
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { schema } from '.';
 import { EnvSchemaType } from '../config/env';
-import { DbService } from './db.service';
+import { DrizzleService } from './drizzle.service';
 
-jest.mock('pg');
+jest.mock('pg', () => {
+  return {
+    Pool: jest.fn(() => ({
+      end: jest.fn(),
+    })),
+  };
+});
+
 jest.mock('drizzle-orm/node-postgres', () => ({
   drizzle: jest.fn().mockReturnValue('mockDrizzle'),
 }));
@@ -21,21 +28,18 @@ const mockEnv: Partial<EnvSchemaType> = {
 };
 
 const mockConfigService = {
-  get: jest
-    .fn()
-    .mockImplementation((key: string): string | undefined => mockEnv[key]),
+  get: jest.fn((key: string): string | undefined => mockEnv[key]),
 };
 
-describe('DbService', () => {
-  let service: DbService;
+describe('DrizzleService', () => {
+  let service: DrizzleService;
   let configService: jest.Mocked<ConfigService>;
+  let pool: Pool;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
-
-    const app: TestingModule = await Test.createTestingModule({
+    const app = await Test.createTestingModule({
       providers: [
-        DbService,
+        DrizzleService,
         {
           provide: ConfigService,
           useValue: mockConfigService,
@@ -43,8 +47,13 @@ describe('DbService', () => {
       ],
     }).compile();
 
-    service = app.get<DbService>(DbService);
+    service = app.get(DrizzleService);
     configService = app.get<jest.Mocked<ConfigService>>(ConfigService);
+    pool = (Pool as unknown as jest.Mock).mock.results[0].value;
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 
   it('should create a drizzle instance', () => {
@@ -60,7 +69,7 @@ describe('DbService', () => {
     );
 
     expect(drizzle).toHaveBeenCalledWith(
-      expect.any(Pool),
+      pool,
       expect.objectContaining({ schema }),
     );
 
@@ -73,8 +82,13 @@ describe('DbService', () => {
       return mockEnv[key];
     });
 
-    service = new DbService(configService);
+    service = new DrizzleService(configService);
 
     expect(Pool).toHaveBeenCalledWith(expect.objectContaining({ ssl: false }));
+  });
+
+  it('should end pool connection on module destroy', async () => {
+    await service.onModuleDestroy();
+    expect(pool.end).toHaveBeenCalledTimes(1);
   });
 });

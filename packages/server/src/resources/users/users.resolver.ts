@@ -1,12 +1,12 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { and, asc, desc, eq, gt, lt } from 'drizzle-orm';
-import { users } from '../../db/schema';
+import { users } from '../../common/db/schema';
 import {
   decodeCursor,
   encodeCursor,
-} from '../../graphql/pagination/cursor.util';
-import { PageInfo } from '../../graphql/pagination/page-info';
-import { PaginationArgs } from '../../graphql/pagination/pagination.args';
+} from '../../common/graphql/pagination/cursor.util';
+import { PageInfo } from '../../common/graphql/pagination/page-info';
+import { PaginationArgs } from '../../common/graphql/pagination/pagination.args';
 import { CreateUserInput } from './dto/create-user.input';
 import { FindUserInput } from './dto/find-user.input';
 import { FindUsersInput } from './dto/find-users.input';
@@ -20,10 +20,11 @@ export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
   @Mutation(() => User)
-  createUser(
+  async createUser(
     @Args('createUserInput') createUserInput: CreateUserInput,
   ): Promise<User> {
-    return this.usersService.create(createUserInput).then((res) => res[0]);
+    const res = await this.usersService.create(createUserInput);
+    return res[0];
   }
 
   @Query(() => UserConnection)
@@ -43,7 +44,7 @@ export class UsersResolver {
       .filter(([, v]) => v !== undefined)
       .map(([k, v]) => eq(users[k], v));
 
-    const [rows, totalCount] = await this.usersService.findMany({
+    const [rows, totalCount] = await this.usersService.findManyWithCount({
       where: and(
         decodedCursor ? dir(users.id, decodedCursor) : undefined,
         ...conditions,
@@ -89,17 +90,15 @@ export class UsersResolver {
     @Args('updateUserInput') { id, ...updateUserInput }: UpdateUserInput,
   ): Promise<User> {
     return this.usersService
-      .update({
-        where: eq(users.id, id),
-        set: updateUserInput,
-      })
+      .update(eq(users.id, id), updateUserInput)
       .then((res) => res[0]);
   }
 
   @Mutation(() => User)
-  deleteUser(@Args('findUserInput') { id }: FindUserInput): Promise<User> {
-    return this.usersService
-      .delete({ where: eq(users.id, id) })
-      .then((res) => res[0]);
+  async deleteUser(
+    @Args('findUserInput') { id }: FindUserInput,
+  ): Promise<User> {
+    const res = await this.usersService.delete(eq(users.id, id));
+    return res[0];
   }
 }

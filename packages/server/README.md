@@ -6,4 +6,4 @@ A web game about drawing things from memory!
 
 This is the GraphQL backend for Sketched built with [Nest.js](https://nestjs.com/).
 
-## [Back to Home](..)
+## [Back to Home](../..)

@@ -1,66 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { SQL } from 'drizzle-orm';
-import {
-  DbColumn,
-  DbInsertValue,
-  DbService,
-  DbUpdateSetSource,
-} from '../../db/db.service';
-import { users } from '../../db/schema';
+import { Tail } from 'rxjs';
+import { DbService } from '../../common/db/db.service';
+import { users } from '../../common/db/schema';
+import { CreateUserInput } from './dto/create-user.input';
 import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly dbService: DbService) {}
 
-  idColumn(id: number): DbColumn {
-    return users.id;
+  create(...values: CreateUserInput[]): Promise<User[]> {
+    return this.dbService.create<typeof users>(users, values);
   }
 
-  create(...values: DbInsertValue<typeof users>[]): Promise<User[]> {
-    return this.dbService.db.insert(users).values(values).returning();
+  findMany(...args: Tail<Parameters<DbService['findMany']>>): Promise<User[]> {
+    return this.dbService.findMany<typeof users>(users, ...args);
   }
 
-  findMany({
-    where,
-    orderBy,
-    limit,
-  }: {
-    where?: SQL;
-    orderBy?: (DbColumn | SQL | SQL.Aliased)[];
-    limit?: number;
-  } = {}): Promise<[User[], number]> {
-    return this.dbService.db.transaction(async (tx) => {
-      const query = tx.select().from(users).where(where);
-      if (limit !== undefined) query.limit(limit);
-      if (orderBy !== undefined) query.orderBy(...orderBy);
-      return [await query, await tx.$count(users, where)];
-    });
+  findManyWithCount(
+    ...args: Tail<Parameters<DbService['findManyWithCount']>>
+  ): Promise<[User[], number]> {
+    return this.dbService.findManyWithCount<typeof users>(users, ...args);
   }
 
-  findOne({
-    where,
-    orderBy,
-  }: {
-    where?: SQL;
-    orderBy?: (DbColumn | SQL | SQL.Aliased)[];
-  } = {}): Promise<User | undefined> {
-    const query = this.dbService.db.select().from(users).where(where).limit(1);
-    if (orderBy !== undefined) query.orderBy(...orderBy);
-    return query.then((res) => res[0]);
+  findOne(
+    ...args: Tail<Parameters<DbService['findOne']>>
+  ): Promise<User | undefined> {
+    return this.dbService.findOne<typeof users>(users, ...args);
   }
 
-  update({
-    set,
-    where,
-  }: {
-    set: DbUpdateSetSource<typeof users>;
-    where: SQL;
-  }): Promise<User[]> {
-    return this.dbService.db.update(users).set(set).where(where).returning();
+  update(...args: Tail<Parameters<DbService['update']>>): Promise<User[]> {
+    return this.dbService.update<typeof users>(users, ...args);
   }
 
-  delete({ where }: { where: SQL }): Promise<User[]> {
-    return this.dbService.db.delete(users).where(where).returning();
+  delete(...args: Tail<Parameters<DbService['delete']>>): Promise<User[]> {
+    return this.dbService.delete<typeof users>(users, ...args);
   }
 }

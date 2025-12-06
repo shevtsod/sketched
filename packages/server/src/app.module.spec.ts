@@ -1,15 +1,11 @@
 import { AppModule } from './app.module';
 import { CliModule } from './cli/cli.module';
-import { createLogger } from './config/logger';
+import { createLogger } from './common/config/logger';
 
-jest.mock('./config/logger');
+jest.mock('./common/config/logger');
 
 describe('AppModule', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('registers', () => {
+  it('should register', () => {
     const module = AppModule.register();
 
     expect(module).toBeDefined();
@@ -23,7 +19,7 @@ describe('AppModule', () => {
     );
   });
 
-  it('registers with cli', () => {
+  it('should register with cli', () => {
     const module = AppModule.register({ cli: true });
 
     expect(module).toBeDefined();

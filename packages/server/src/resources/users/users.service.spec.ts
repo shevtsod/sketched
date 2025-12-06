@@ -1,5 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { DbService } from '../../db/db.service';
+import { Test } from '@nestjs/testing';
+import { DbService } from '../../common/db/db.service';
 import { UsersService } from './users.service';
 
 const mockDbService = {};
@@ -9,7 +9,7 @@ describe('UsersService', () => {
   let dbService: jest.Mocked<DbService>;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       providers: [
         UsersService,
         {
@@ -19,7 +19,7 @@ describe('UsersService', () => {
       ],
     }).compile();
 
-    service = module.get<UsersService>(UsersService);
+    service = module.get(UsersService);
     dbService = module.get<jest.Mocked<DbService>>(DbService);
   });
 

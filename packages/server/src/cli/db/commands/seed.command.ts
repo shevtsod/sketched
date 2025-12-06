@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { DrizzleQueryError } from 'drizzle-orm';
 import { CommandRunner, SubCommand } from 'nest-commander';
-import { DbService } from '../../../db/db.service';
+import { DbManagementService } from '../../../common/db/db-management.service';
 
 @SubCommand({
   name: 'seed',
@@ -10,7 +10,7 @@ import { DbService } from '../../../db/db.service';
 export class SeedCommand extends CommandRunner {
   private readonly logger = new Logger(SeedCommand.name);
 
-  constructor(private readonly dbService: DbService) {
+  constructor(private readonly dbManagementService: DbManagementService) {
     super();
   }
 
@@ -19,7 +19,7 @@ export class SeedCommand extends CommandRunner {
     _options?: Record<string, any>,
   ): Promise<void> {
     try {
-      await this.dbService.seed();
+      await this.dbManagementService.seed();
     } catch (err) {
       if (err instanceof DrizzleQueryError) {
         this.logger.debug(err.message);

@@ -43,20 +43,27 @@ export class DbService {
    */
   async findMany<T extends PgTable>(
     schema: T,
-    options: {
+    options?: {
       where?: SQL;
-      orderBy?: (PgColumn | SQL | SQL.Aliased)[];
+      orderBy?: (PgColumn | SQL | SQL.Aliased)[] | PgColumn | SQL | SQL.Aliased;
       limit?: number | Placeholder;
-    } = {},
+    },
     tx = this.drizzle.db,
   ) {
     let query = tx
       .select()
       .from(schema as PgTable)
       .$dynamic();
-    if (options.where) query = query.where(options.where);
-    if (options.limit !== undefined) query = query.limit(options.limit);
-    if (options.orderBy) query = query.orderBy(...options.orderBy);
+    if (options?.where) query = query.where(options.where);
+    if (options?.limit !== undefined) query = query.limit(options.limit);
+    if (options?.orderBy) {
+      query = query.orderBy(
+        ...(Array.isArray(options.orderBy)
+          ? options.orderBy
+          : [options.orderBy]),
+      );
+    }
+
     return (await query) as InferSelectModel<T>[];
   }
 
@@ -72,7 +79,7 @@ export class DbService {
     schema: T,
     options?: {
       where?: SQL;
-      orderBy?: (PgColumn | SQL | SQL.Aliased)[];
+      orderBy?: (PgColumn | SQL | SQL.Aliased)[] | PgColumn | SQL | SQL.Aliased;
       limit?: number | Placeholder;
     },
   ): Promise<[InferSelectModel<T>[], number]> {
@@ -96,7 +103,7 @@ export class DbService {
     schema: T,
     options?: {
       where?: SQL;
-      orderBy?: (PgColumn | SQL | SQL.Aliased)[];
+      orderBy?: (PgColumn | SQL | SQL.Aliased)[] | PgColumn | SQL | SQL.Aliased;
     },
     tx = this.drizzle.db,
   ) {
@@ -106,7 +113,13 @@ export class DbService {
       .limit(1)
       .$dynamic();
     if (options?.where) query = query.where(options.where);
-    if (options?.orderBy) query = query.orderBy(...options.orderBy);
+    if (options?.orderBy) {
+      query = query.orderBy(
+        ...(Array.isArray(options.orderBy)
+          ? options.orderBy
+          : [options.orderBy]),
+      );
+    }
     const res = (await query) as InferSelectModel<T>[];
     return res[0];
   }

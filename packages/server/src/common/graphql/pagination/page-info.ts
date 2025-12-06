@@ -4,12 +4,12 @@ import { Field, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class PageInfo {
   /** First cursor */
-  @Field({ nullable: true })
-  startCursor?: string;
+  @Field(() => String, { nullable: true })
+  startCursor: string | null;
 
   /** Last cursor */
-  @Field({ nullable: true })
-  endCursor?: string;
+  @Field(() => String, { nullable: true })
+  endCursor: string | null;
 
   /** True if a previous page exists */
   @Field()

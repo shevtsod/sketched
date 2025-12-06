@@ -82,7 +82,7 @@ describe('DbService', () => {
   it('should find many records with options', async () => {
     const where = eq(testSchema.id, 1);
     const limit = 1;
-    const orderBy = [testSchema.id];
+    const orderBy = testSchema.id;
     mockDrizzleService.db.orderBy.mockReturnValue(data);
 
     const res = await service.findMany(testSchema, {
@@ -93,7 +93,7 @@ describe('DbService', () => {
     expect(mockDrizzleService.db.select).toHaveBeenCalledTimes(1);
     expect(mockDrizzleService.db.where).toHaveBeenCalledWith(where);
     expect(mockDrizzleService.db.limit).toHaveBeenCalledWith(limit);
-    expect(mockDrizzleService.db.orderBy).toHaveBeenCalledWith(...orderBy);
+    expect(mockDrizzleService.db.orderBy).toHaveBeenCalledWith(orderBy);
     expect(res).toEqual(data);
   });
 
@@ -117,7 +117,7 @@ describe('DbService', () => {
   it('should find many records with count and options', async () => {
     const where = eq(testSchema.id, 1);
     const limit = 1;
-    const orderBy = [testSchema.id];
+    const orderBy = testSchema.id;
     mockDrizzleService.db.orderBy.mockReturnValue(data);
     mockDrizzleService.db.$count.mockReturnValue(data.length);
 
@@ -130,7 +130,7 @@ describe('DbService', () => {
     expect(mockDrizzleService.db.select).toHaveBeenCalledTimes(1);
     expect(mockDrizzleService.db.where).toHaveBeenCalledWith(where);
     expect(mockDrizzleService.db.limit).toHaveBeenCalledWith(limit);
-    expect(mockDrizzleService.db.orderBy).toHaveBeenCalledWith(...orderBy);
+    expect(mockDrizzleService.db.orderBy).toHaveBeenCalledWith(orderBy);
     expect(mockDrizzleService.db.$count).toHaveBeenCalledWith(
       testSchema,
       where,
@@ -151,14 +151,14 @@ describe('DbService', () => {
 
   it('should find a record with options', async () => {
     const where = eq(testSchema.id, 1);
-    const orderBy = [testSchema.id];
+    const orderBy = testSchema.id;
     mockDrizzleService.db.orderBy.mockReturnValue(data);
 
     const res = await service.findOne(testSchema, { where, orderBy });
     expect(mockDrizzleService.db.select).toHaveBeenCalledTimes(1);
     expect(mockDrizzleService.db.where).toHaveBeenCalledWith(where);
     expect(mockDrizzleService.db.limit).toHaveBeenCalledWith(1);
-    expect(mockDrizzleService.db.orderBy).toHaveBeenCalledWith(...orderBy);
+    expect(mockDrizzleService.db.orderBy).toHaveBeenCalledWith(orderBy);
     expect(res).toEqual(data[0]);
   });
 

@@ -5,7 +5,7 @@ import {
   Option,
   SubCommand,
 } from 'nest-commander';
-import { DbService } from '../../../db/db.service';
+import { DbManagementService } from '../../../common/db/db-management.service';
 
 @SubCommand({
   name: 'drop',
@@ -15,7 +15,7 @@ export class DropCommand extends CommandRunner {
   private readonly logger = new Logger(DropCommand.name);
 
   constructor(
-    private readonly dbService: DbService,
+    private readonly dbManagementService: DbManagementService,
     private readonly inquirerService: InquirerService,
   ) {
     super();
@@ -41,7 +41,7 @@ export class DropCommand extends CommandRunner {
         throw new Error('Cancelled');
       }
 
-      await this.dbService.drop();
+      await this.dbManagementService.drop();
     } catch (err) {
       this.logger.error({ err });
       throw err;

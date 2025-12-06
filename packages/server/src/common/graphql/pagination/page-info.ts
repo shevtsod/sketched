@@ -13,9 +13,9 @@ export class PageInfo {
 
   /** True if a previous page exists */
   @Field()
-  hasPreviousPage?: boolean;
+  hasPreviousPage: boolean;
 
   /** True if a next page exists */
   @Field()
-  hasNextPage?: boolean;
+  hasNextPage: boolean;
 }

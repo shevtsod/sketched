@@ -1,7 +1,7 @@
 import { CommandFactory } from 'nest-commander';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
-import { env } from './config/env';
+import { env } from './common/config/env';
 
 async function bootstrap() {
   // https://docs.nestjs.com/recipes/nest-commander

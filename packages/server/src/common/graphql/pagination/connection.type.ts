@@ -15,14 +15,19 @@ export interface Connection<T> {
   totalCount: number;
 }
 
+/**
+ * Creates a Connection class for the given edge
+ *
+ * @param EdgeClass class of edge
+ * @returns class of connection
+ */
 export function ConnectionType<T>(
-  EntityClass: Type<T>,
   EdgeClass: Type<Edge<T>>,
 ): Type<Connection<T>> {
   @ObjectType({ isAbstract: true })
-  abstract class ConnectionClass<T> {
+  abstract class ConnectionClass {
     @Field(() => [EdgeClass])
-    edges: Edge<InstanceType<typeof EntityClass>>[];
+    edges: Edge<T>[];
 
     @Field(() => PageInfo)
     pageInfo: PageInfo;

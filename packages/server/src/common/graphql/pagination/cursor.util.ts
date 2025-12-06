@@ -5,7 +5,8 @@
  * @returns encoded cursor
  */
 export function encodeCursor(value: string | number | Date): string {
-  return Buffer.from(String(value)).toString('base64');
+  const payload = JSON.stringify({ value });
+  return Buffer.from(payload).toString('base64');
 }
 
 /**
@@ -14,6 +15,8 @@ export function encodeCursor(value: string | number | Date): string {
  * @param cursor encoded cursor
  * @returns decoded unique identifier
  */
-export function decodeCursor(cursor: string): string {
-  return Buffer.from(cursor, 'base64').toString('utf8');
+export function decodeCursor(cursor: string): string | number | Date {
+  const decoded = Buffer.from(cursor, 'base64').toString('utf8');
+  const { value } = JSON.parse(decoded);
+  return value;
 }

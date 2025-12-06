@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DbModule } from '../../db/db.module';
+import { DbModule } from '../../common/db/db.module';
 import { UsersResolver } from './users.resolver';
 import { UsersService } from './users.service';
 

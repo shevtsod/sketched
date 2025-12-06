@@ -5,7 +5,7 @@ import {
   Option,
   SubCommand,
 } from 'nest-commander';
-import { DbService } from '../../../db/db.service';
+import { DbManagementService } from '../../../common/db/db-management.service';
 
 @SubCommand({
   name: 'reset',
@@ -15,7 +15,7 @@ export class ResetCommand extends CommandRunner {
   private readonly logger = new Logger(ResetCommand.name);
 
   constructor(
-    private readonly dbService: DbService,
+    private readonly dbManagementService: DbManagementService,
     private readonly inquirerService: InquirerService,
   ) {
     super();
@@ -41,7 +41,7 @@ export class ResetCommand extends CommandRunner {
         throw new Error('Cancelled');
       }
 
-      await this.dbService.reset();
+      await this.dbManagementService.reset();
     } catch (err) {
       this.logger.error({ err });
       throw err;

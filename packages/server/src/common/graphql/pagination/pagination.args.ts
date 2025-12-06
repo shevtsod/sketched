@@ -1,6 +1,6 @@
 import { ArgsType, Field } from '@nestjs/graphql';
 
-/** Arguments for API resource pagination requests */
+/** Request arguments for API resource pagination */
 @ArgsType()
 export class PaginationArgs {
   /** Forward pagination limit */

@@ -38,7 +38,7 @@ async function bootstrap() {
     environment: env.NODE_ENV,
     version: env.VERSION,
     url,
-    graphqlUrl: `${url}/graphql`,
+    graphqlUrl: `${url}graphql`,
   });
 }
 

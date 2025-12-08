@@ -1,6 +1,5 @@
 // @ts-check
 import eslint from '@eslint/js';
-import pluginJest from 'eslint-plugin-jest';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -16,7 +15,6 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.jest,
       },
       sourceType: 'commonjs',
       parserOptions: {
@@ -40,24 +38,6 @@ export default tseslint.config(
           destructuredArrayIgnorePattern: '^_',
         },
       ],
-    },
-  },
-  // https://github.com/jest-community/eslint-plugin-jest
-  {
-    files: ['**/*.spec.ts', '**/*.test.ts'],
-    plugins: { jest: pluginJest },
-    languageOptions: {
-      globals: pluginJest.environments.globals.globals,
-    },
-    rules: {
-      // https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/unbound-method.md
-      '@typescript-eslint/unbound-method': 'off',
-      'jest/unbound-method': 'error',
-      'jest/no-disabled-tests': 'warn',
-      'jest/no-focused-tests': 'error',
-      'jest/no-identical-title': 'error',
-      'jest/prefer-to-have-length': 'warn',
-      'jest/valid-expect': 'error',
     },
   },
 );

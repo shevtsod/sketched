@@ -14,10 +14,12 @@ import {
 // [0, 1, 2, 3, ..., PAGINATE_LIMIT_MAX]
 const data = Array.from({ length: PAGINATE_LIMIT_MAX + 1 }, (_, i) => i);
 
+// return cursor for data (use value)
 const cursorData: CursorFunc<(typeof data)[number], (typeof data)[number]> = (
   item,
 ) => item;
 
+// simulate fetching data by slicing array
 const fetchData: FetchFunc<(typeof data)[number], (typeof data)[number]> = (
   limit,
   direction,
@@ -151,7 +153,7 @@ describe('pagination.util', () => {
   });
 
   it('fails to paginate forwards and backwards at the same time', async () => {
-    expect(
+    await expect(
       paginateData({
         first: PAGINATE_LIMIT_DEFAULT,
         last: PAGINATE_LIMIT_DEFAULT,
@@ -160,24 +162,24 @@ describe('pagination.util', () => {
   });
 
   it('fails to paginate with before and after cursors at the same time', async () => {
-    expect(
+    await expect(
       paginateData({ before: encodeCursor(0), after: encodeCursor(0) }),
     ).rejects.toThrow(PaginationArgsError);
   });
 
   it('fails to paginate with invalid direction and cursor combination', async () => {
-    expect(paginateData({ before: encodeCursor(0) })).rejects.toThrow(
+    await expect(paginateData({ before: encodeCursor(0) })).rejects.toThrow(
       PaginationArgsError,
     );
 
-    expect(
+    await expect(
       paginateData({ last: PAGINATE_LIMIT_DEFAULT, after: encodeCursor(0) }),
     ).rejects.toThrow(PaginationArgsError);
   });
 
   it('fails to paginate over limit', async () => {
-    expect(paginateData({ first: PAGINATE_LIMIT_MAX + 1 })).rejects.toThrow(
-      PaginationArgsError,
-    );
+    await expect(
+      paginateData({ first: PAGINATE_LIMIT_MAX + 1 }),
+    ).rejects.toThrow(PaginationArgsError);
   });
 });

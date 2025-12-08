@@ -1,5 +1,5 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { env } from './common/config/env';
@@ -15,8 +15,13 @@ async function bootstrap() {
     new ValidationPipe({
       // transform objects to DTO instances
       transform: true,
+      // remove properties without validators
+      whitelist: true,
     }),
   );
+
+  // https://docs.nestjs.com/techniques/serialization#serialization
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   // https://docs.nestjs.com/faq/global-prefix
   app.setGlobalPrefix(env.BASE_PATH);

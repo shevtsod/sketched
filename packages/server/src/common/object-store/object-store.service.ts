@@ -26,7 +26,7 @@ export class ObjectStoreService {
     this.s3 = new S3Client({
       endpoint: this.endpoint,
       region: configService.get<string>('STORAGE_REGION'),
-      forcePathStyle: !this.endpoint?.endsWith('amazonaws.com '),
+      forcePathStyle: !this.endpoint?.endsWith('amazonaws.com'),
       credentials: {
         accessKeyId: configService.get<string>('STORAGE_ACCESS_KEY_ID')!,
         secretAccessKey: configService.get<string>(
@@ -45,7 +45,9 @@ export class ObjectStoreService {
    * @param input put object command input
    * @returns object path
    */
-  async putObject(input: PutObjectCommandInput): Promise<string> {
+  async putObject(
+    input: Omit<PutObjectCommandInput, 'Bucket'>,
+  ): Promise<string> {
     const command = new PutObjectCommand({
       ...input,
       Bucket: this.bucket,
@@ -62,7 +64,7 @@ export class ObjectStoreService {
    * @returns streaming body
    */
   async getObject(
-    input: GetObjectCommandInput,
+    input: Omit<GetObjectCommandInput, 'Bucket'>,
   ): Promise<GetObjectCommandOutput['Body']> {
     const command = new GetObjectCommand({
       ...input,

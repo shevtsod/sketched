@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { Tail } from 'rxjs';
 import { DbService } from '../../common/db/db.service';
 import { users } from '../../common/db/schema';
@@ -9,31 +10,50 @@ import { User } from './entities/user.entity';
 export class UsersService {
   constructor(private readonly dbService: DbService) {}
 
-  create(...values: CreateUserInput[]): Promise<User[]> {
-    return this.dbService.create<typeof users>(users, values);
+  async create(...values: CreateUserInput[]): Promise<User[]> {
+    const records = await this.dbService.create(users, values);
+    return plainToInstance(User, records);
   }
 
-  findMany(...args: Tail<Parameters<DbService['findMany']>>): Promise<User[]> {
-    return this.dbService.findMany<typeof users>(users, ...args);
-  }
-
-  findManyWithCount(
-    ...args: Tail<Parameters<DbService['findManyWithCount']>>
-  ): Promise<[User[], number]> {
-    return this.dbService.findManyWithCount<typeof users>(users, ...args);
-  }
-
-  findOne(
+  async findOne(
     ...args: Tail<Parameters<DbService['findOne']>>
   ): Promise<User | undefined> {
-    return this.dbService.findOne<typeof users>(users, ...args);
+    const record = await this.dbService.findOne(users, ...args);
+    return plainToInstance(User, record);
   }
 
-  update(...args: Tail<Parameters<DbService['update']>>): Promise<User[]> {
-    return this.dbService.update<typeof users>(users, ...args);
+  async findMany(
+    ...args: Tail<Parameters<DbService['findMany']>>
+  ): Promise<User[]> {
+    const records = await this.dbService.findMany(users, ...args);
+    return plainToInstance(User, records);
   }
 
-  delete(...args: Tail<Parameters<DbService['delete']>>): Promise<User[]> {
-    return this.dbService.delete<typeof users>(users, ...args);
+  async findManyWithCount(
+    ...args: Tail<Parameters<DbService['findManyWithCount']>>
+  ): Promise<[User[], number]> {
+    const [records, count] = await this.dbService.findManyWithCount(
+      users,
+      ...args,
+    );
+    return [plainToInstance(User, records), count];
+  }
+
+  async update(
+    ...args: Tail<Parameters<DbService['update']>>
+  ): Promise<User[]> {
+    const records = await this.dbService.update<typeof users>(users, ...args);
+    return plainToInstance(User, records);
+  }
+
+  async delete(
+    ...args: Tail<Parameters<DbService['delete']>>
+  ): Promise<User[]> {
+    const records = await this.dbService.delete(users, ...args);
+    return plainToInstance(User, records);
+  }
+
+  count(...args: Tail<Parameters<DbService['count']>>): Promise<number> {
+    return this.dbService.count(users, ...args);
   }
 }

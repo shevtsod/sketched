@@ -34,6 +34,39 @@ export class DbService {
   }
 
   /**
+   * Returns the first record matching the given query options
+   *
+   * @param schema schema to use
+   * @param options query options
+   * @param tx optional transaction instance
+   * @returns first record matching query options
+   */
+  async findOne<T extends PgTable>(
+    schema: T,
+    options?: {
+      where?: SQL;
+      orderBy?: (PgColumn | SQL | SQL.Aliased)[] | PgColumn | SQL | SQL.Aliased;
+    },
+    tx = this.drizzle.db,
+  ) {
+    let query = tx
+      .select()
+      .from(schema as PgTable)
+      .limit(1)
+      .$dynamic();
+    if (options?.where) query = query.where(options.where);
+    if (options?.orderBy) {
+      query = query.orderBy(
+        ...(Array.isArray(options.orderBy)
+          ? options.orderBy
+          : [options.orderBy]),
+      );
+    }
+    const res = (await query) as InferSelectModel<T>[];
+    return res[0];
+  }
+
+  /**
    * Returns a list of records matching the given query options
    *
    * @param schema schema to use
@@ -77,51 +110,19 @@ export class DbService {
    */
   findManyWithCount<T extends PgTable>(
     schema: T,
-    options?: {
+    findManyOptions?: {
       where?: SQL;
       orderBy?: (PgColumn | SQL | SQL.Aliased)[] | PgColumn | SQL | SQL.Aliased;
       limit?: number | Placeholder;
     },
+    countOptions?: { where?: SQL },
   ): Promise<[InferSelectModel<T>[], number]> {
     return this.drizzle.db.transaction(async (tx) => {
       return [
-        await this.findMany(schema, options, tx),
-        await this.count(schema, options),
+        await this.findMany(schema, findManyOptions, tx),
+        await this.count(schema, countOptions?.where),
       ];
     });
-  }
-
-  /**
-   * Returns the first record matching the given query options
-   *
-   * @param schema schema to use
-   * @param options query options
-   * @param tx optional transaction instance
-   * @returns first record matching query options
-   */
-  async findOne<T extends PgTable>(
-    schema: T,
-    options?: {
-      where?: SQL;
-      orderBy?: (PgColumn | SQL | SQL.Aliased)[] | PgColumn | SQL | SQL.Aliased;
-    },
-    tx = this.drizzle.db,
-  ) {
-    let query = tx
-      .select()
-      .from(schema as PgTable)
-      .limit(1)
-      .$dynamic();
-    if (options?.where) query = query.where(options.where);
-    if (options?.orderBy) {
-      query = query.orderBy(
-        ...(Array.isArray(options.orderBy)
-          ? options.orderBy
-          : [options.orderBy]),
-      );
-    }
-    const res = (await query) as InferSelectModel<T>[];
-    return res[0];
   }
 
   /**
@@ -135,7 +136,7 @@ export class DbService {
    */
   update<T extends PgTable>(
     schema: T,
-    where: SQL,
+    where: SQL | undefined,
     set: PgUpdateSetSource<T>,
     tx = this.drizzle.db,
   ) {
@@ -150,7 +151,7 @@ export class DbService {
    * @param tx optional transaction instance
    * @returns list of deleted records
    */
-  delete<T extends PgTable>(schema: T, where: SQL, tx = this.drizzle.db) {
+  delete<T extends PgTable>(schema: T, where?: SQL, tx = this.drizzle.db) {
     return tx.delete(schema).where(where).returning();
   }
 
@@ -162,11 +163,7 @@ export class DbService {
    * @param tx optional transaction instance
    * @returns number of records
    */
-  count<T extends PgTable>(
-    schema: T,
-    options?: { where?: SQL },
-    tx = this.drizzle.db,
-  ) {
-    return tx.$count(schema, options?.where);
+  count<T extends PgTable>(schema: T, where?: SQL, tx = this.drizzle.db) {
+    return tx.$count(schema, where);
   }
 }

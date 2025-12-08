@@ -26,37 +26,41 @@ export class UsersResolver {
     return res[0];
   }
 
-  @Query(() => UserConnection)
-  async users(
-    @Args() pagination: PaginationArgs,
-    @Args('findUsersInput', { nullable: true }) findUsersInput?: FindUsersInput,
-  ): Promise<UserConnection> {
-    return paginate(
-      pagination,
-      (user) => user.id,
-      (limit, direction, cursor) => {
-        const operator = direction === Direction.ASC ? gt : lt;
-        const conditions = Object.entries(findUsersInput ?? {})
-          .filter(([, v]) => v !== undefined)
-          .map(([k, v]) => eq(users[k], v));
-
-        return this.usersService.findManyWithCount({
-          where: and(
-            cursor ? operator(users.id, cursor) : undefined,
-            ...conditions,
-          ),
-          limit,
-          orderBy: asc(users.id),
-        });
-      },
-    );
-  }
-
   @Query(() => User)
   user(
     @Args('findUserInput') { id }: FindUserInput,
   ): Promise<User | undefined> {
     return this.usersService.findOne({ where: eq(users.id, id) });
+  }
+
+  @Query(() => UserConnection)
+  async users(
+    @Args() pagination: PaginationArgs,
+    @Args('findUsersInput', { nullable: true }) findUsersInput?: FindUsersInput,
+  ): Promise<UserConnection> {
+    const where = and(
+      ...Object.entries(findUsersInput ?? {}).map(([k, v]) => eq(users[k], v)),
+    );
+
+    return paginate(
+      pagination,
+      (user) => user.id,
+      (limit, direction, cursor) => {
+        const operator = direction === Direction.ASC ? gt : lt;
+        const whereId = cursor ? operator(users.id, cursor) : undefined;
+
+        return this.usersService.findManyWithCount(
+          {
+            where: and(where, whereId),
+            limit,
+            orderBy: asc(users.id),
+          },
+          {
+            where,
+          },
+        );
+      },
+    );
   }
 
   @Mutation(() => User)

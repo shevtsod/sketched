@@ -20,7 +20,9 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    // https://vitest.dev/config/globals
+    "types": ["vitest/globals"]
   },
   // https://github.com/nestjs/nest/issues/11615
   "watchOptions": {

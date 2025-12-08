@@ -2,21 +2,17 @@ import { Test } from '@nestjs/testing';
 import { sql } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { reset, seed } from 'drizzle-seed';
+import { Mocked } from 'vitest';
+import { mockDrizzleService } from './__mocks__/drizzle.service.mock';
 import { DbManagementService } from './db-management.service';
 import { DrizzleService } from './drizzle.service';
 
-jest.mock('drizzle-seed');
-jest.mock('drizzle-orm/node-postgres/migrator');
-
-const mockDrizzleService = {
-  db: {
-    execute: jest.fn(),
-  },
-};
+vi.mock('drizzle-seed');
+vi.mock('drizzle-orm/node-postgres/migrator');
 
 describe('DbManagementService', () => {
   let service: DbManagementService;
-  let drizzleService: jest.Mocked<DrizzleService>;
+  let drizzleService: Mocked<DrizzleService>;
 
   beforeEach(async () => {
     const app = await Test.createTestingModule({
@@ -30,7 +26,7 @@ describe('DbManagementService', () => {
     }).compile();
 
     service = app.get(DbManagementService);
-    drizzleService = app.get<jest.Mocked<DrizzleService>>(DrizzleService);
+    drizzleService = app.get<Mocked<DrizzleService>>(DrizzleService);
   });
 
   it('should be defined', () => {

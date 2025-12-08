@@ -2,7 +2,7 @@ import { AppModule } from './app.module';
 import { CliModule } from './cli/cli.module';
 import { createLogger } from './common/config/logger';
 
-jest.mock('./common/config/logger');
+vi.mock('./common/config/logger.js');
 
 describe('AppModule', () => {
   it('should register', () => {

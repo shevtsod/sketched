@@ -23,11 +23,15 @@
     "dev:client": "npm -w client run dev",
     "dev:server": "npm -w server run start:debug",
     "dev": "conc -c auto 'npm:dev:client' 'npm:dev:server'",
+    "start:client": "npm -w client run preview",
+    "start:server": "npm -w server run start:prod",
+    "start": "conc -c auto 'npm:start:client' 'npm:start:server'",
     "test:client": "npm -w client run test:cov",
     "test:server": "npm -w server run test:cov",
     "test:server:e2e": "npm -w server run test:e2e",
     "test": "conc -c auto 'npm:test:client' 'npm:test:server' 'npm:test:server:e2e'",
-    "cli": "npm -w server run cli"
+    "cli": "npm -w server run cli:prod --",
+    "cli:dev": "npm -w server run cli --"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

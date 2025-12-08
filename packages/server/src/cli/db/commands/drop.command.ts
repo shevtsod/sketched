@@ -21,6 +21,15 @@ export class DropCommand extends CommandRunner {
     super();
   }
 
+  @Option({
+    name: 'confirm',
+    flags: '-y, --yes',
+    description: 'Confirm silently',
+  })
+  parseConfirm(val: boolean) {
+    return val;
+  }
+
   async run(
     _passedParams: string[],
     options?: Record<string, any>,
@@ -46,14 +55,5 @@ export class DropCommand extends CommandRunner {
       this.logger.error({ err });
       throw err;
     }
-  }
-
-  @Option({
-    name: 'confirm',
-    flags: '-y, --yes',
-    description: 'Confirm silently',
-  })
-  parseShell(val: string) {
-    return val;
   }
 }

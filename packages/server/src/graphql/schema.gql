@@ -46,8 +46,12 @@ type UserConnection {
 }
 
 type Query {
-  users(first: Float, after: String, last: Float, before: String, findUsersInput: FindUsersInput): UserConnection!
   user(findUserInput: FindUserInput!): User!
+  users(first: Float, after: String, last: Float, before: String, findUsersInput: FindUsersInput): UserConnection!
+}
+
+input FindUserInput {
+  id: ID!
 }
 
 input FindUsersInput {
@@ -57,10 +61,6 @@ input FindUsersInput {
   image: String
   createdAt: DateTime
   updatedAt: DateTime
-}
-
-input FindUserInput {
-  id: ID!
 }
 
 type Mutation {

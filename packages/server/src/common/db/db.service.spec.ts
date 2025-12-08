@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { eq, InferSelectModel } from 'drizzle-orm';
 import { bigint, pgTable, varchar } from 'drizzle-orm/pg-core';
+import { Mock, Mocked } from 'vitest';
 import { DbService } from './db.service';
 import { DrizzleService } from './drizzle.service';
 
@@ -18,26 +19,26 @@ const data: TestEntity[] = [
 
 describe('DbService', () => {
   let service: DbService;
-  let mockDrizzleService: { db: Record<string, jest.Mock> };
-  let drizzleService: jest.Mocked<DrizzleService>;
+  let mockDrizzleService: { db: Record<string, Mock> };
+  let drizzleService: Mocked<DrizzleService>;
 
   beforeEach(async () => {
     mockDrizzleService = {
       db: {
-        $count: jest.fn().mockReturnThis(),
-        $dynamic: jest.fn().mockReturnThis(),
-        delete: jest.fn().mockReturnThis(),
-        from: jest.fn().mockReturnThis(),
-        insert: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        set: jest.fn().mockReturnThis(),
-        returning: jest.fn().mockReturnThis(),
-        transaction: jest.fn((fn) => fn()),
-        update: jest.fn().mockReturnThis(),
-        values: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
+        $count: vi.fn().mockReturnThis(),
+        $dynamic: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        from: vi.fn().mockReturnThis(),
+        insert: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        set: vi.fn().mockReturnThis(),
+        returning: vi.fn().mockReturnThis(),
+        transaction: vi.fn((fn) => fn()),
+        update: vi.fn().mockReturnThis(),
+        values: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
       },
     };
 
@@ -52,7 +53,7 @@ describe('DbService', () => {
     }).compile();
 
     service = app.get(DbService);
-    drizzleService = app.get<jest.Mocked<DrizzleService>>(DrizzleService);
+    drizzleService = app.get<Mocked<DrizzleService>>(DrizzleService);
   });
 
   it('should be defined', () => {
@@ -66,6 +67,30 @@ describe('DbService', () => {
     const res = await service.create(testSchema, data);
     expect(mockDrizzleService.db.insert).toHaveBeenCalledTimes(1);
     expect(res).toEqual(expect.arrayContaining(data));
+  });
+
+  it('should find a record', async () => {
+    mockDrizzleService.db.$dynamic.mockReturnValue(data);
+
+    const res = await service.findOne(testSchema);
+    expect(mockDrizzleService.db.select).toHaveBeenCalledTimes(1);
+    expect(mockDrizzleService.db.where).not.toHaveBeenCalled();
+    expect(mockDrizzleService.db.limit).toHaveBeenCalledWith(1);
+    expect(mockDrizzleService.db.orderBy).not.toHaveBeenCalled();
+    expect(res).toEqual(data[0]);
+  });
+
+  it('should find a record with options', async () => {
+    const where = eq(testSchema.id, 1);
+    const orderBy = testSchema.id;
+    mockDrizzleService.db.orderBy.mockReturnValue(data);
+
+    const res = await service.findOne(testSchema, { where, orderBy });
+    expect(mockDrizzleService.db.select).toHaveBeenCalledTimes(1);
+    expect(mockDrizzleService.db.where).toHaveBeenCalledWith(where);
+    expect(mockDrizzleService.db.limit).toHaveBeenCalledWith(1);
+    expect(mockDrizzleService.db.orderBy).toHaveBeenCalledWith(orderBy);
+    expect(res).toEqual(data[0]);
   });
 
   it('should find many records', async () => {
@@ -121,11 +146,17 @@ describe('DbService', () => {
     mockDrizzleService.db.orderBy.mockReturnValue(data);
     mockDrizzleService.db.$count.mockReturnValue(data.length);
 
-    const res = await service.findManyWithCount(testSchema, {
-      where,
-      limit,
-      orderBy,
-    });
+    const res = await service.findManyWithCount(
+      testSchema,
+      {
+        where,
+        limit,
+        orderBy,
+      },
+      {
+        where,
+      },
+    );
     expect(mockDrizzleService.db.transaction).toHaveBeenCalledTimes(1);
     expect(mockDrizzleService.db.select).toHaveBeenCalledTimes(1);
     expect(mockDrizzleService.db.where).toHaveBeenCalledWith(where);
@@ -136,30 +167,6 @@ describe('DbService', () => {
       where,
     );
     expect(res).toEqual([data, data.length]);
-  });
-
-  it('should find a record', async () => {
-    mockDrizzleService.db.$dynamic.mockReturnValue(data);
-
-    const res = await service.findOne(testSchema);
-    expect(mockDrizzleService.db.select).toHaveBeenCalledTimes(1);
-    expect(mockDrizzleService.db.where).not.toHaveBeenCalled();
-    expect(mockDrizzleService.db.limit).toHaveBeenCalledWith(1);
-    expect(mockDrizzleService.db.orderBy).not.toHaveBeenCalled();
-    expect(res).toEqual(data[0]);
-  });
-
-  it('should find a record with options', async () => {
-    const where = eq(testSchema.id, 1);
-    const orderBy = testSchema.id;
-    mockDrizzleService.db.orderBy.mockReturnValue(data);
-
-    const res = await service.findOne(testSchema, { where, orderBy });
-    expect(mockDrizzleService.db.select).toHaveBeenCalledTimes(1);
-    expect(mockDrizzleService.db.where).toHaveBeenCalledWith(where);
-    expect(mockDrizzleService.db.limit).toHaveBeenCalledWith(1);
-    expect(mockDrizzleService.db.orderBy).toHaveBeenCalledWith(orderBy);
-    expect(res).toEqual(data[0]);
   });
 
   it('should update a record', async () => {
@@ -192,7 +199,7 @@ describe('DbService', () => {
     const where = eq(testSchema.id, 1);
     mockDrizzleService.db.$count.mockReturnValue(data.length);
 
-    const res = await service.count(testSchema, { where });
+    const res = await service.count(testSchema, where);
     expect(mockDrizzleService.db.$count).toHaveBeenCalledWith(
       testSchema,
       where,

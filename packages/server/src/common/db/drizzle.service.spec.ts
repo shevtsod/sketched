@@ -2,20 +2,22 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import { Mock, Mocked } from 'vitest';
 import { schema } from '.';
+import { createMockConfigService } from '../config/__mocks__/config.service.mock';
 import { EnvSchemaType } from '../config/env';
 import { DrizzleService } from './drizzle.service';
 
-jest.mock('pg', () => {
-  return {
-    Pool: jest.fn(() => ({
-      end: jest.fn(),
-    })),
-  };
-});
+vi.mock('pg', () => ({
+  Pool: vi.fn(
+    class {
+      end = vi.fn();
+    },
+  ),
+}));
 
-jest.mock('drizzle-orm/node-postgres', () => ({
-  drizzle: jest.fn().mockReturnValue('mockDrizzle'),
+vi.mock('drizzle-orm/node-postgres', () => ({
+  drizzle: vi.fn().mockReturnValue('mockDrizzle'),
 }));
 
 const mockEnv: Partial<EnvSchemaType> = {
@@ -27,13 +29,11 @@ const mockEnv: Partial<EnvSchemaType> = {
   isDevOrTest: false,
 };
 
-const mockConfigService = {
-  get: jest.fn((key: string): string | undefined => mockEnv[key]),
-};
+const mockConfigService = createMockConfigService(mockEnv);
 
 describe('DrizzleService', () => {
   let service: DrizzleService;
-  let configService: jest.Mocked<ConfigService>;
+  let configService: Mocked<ConfigService>;
   let pool: Pool;
 
   beforeEach(async () => {
@@ -48,8 +48,8 @@ describe('DrizzleService', () => {
     }).compile();
 
     service = app.get(DrizzleService);
-    configService = app.get<jest.Mocked<ConfigService>>(ConfigService);
-    pool = (Pool as unknown as jest.Mock).mock.results[0].value;
+    configService = app.get<Mocked<ConfigService>>(ConfigService);
+    pool = (Pool as unknown as Mock).mock.results[0].value;
   });
 
   it('should be defined', () => {

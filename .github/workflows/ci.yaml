@@ -69,7 +69,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           # the image to use as base for tags
-          image: "${{ vars.DOCKERHUB_USERNAME }}/sketched-client"
+          images: "${{ vars.DOCKERHUB_USERNAME }}/sketched-client"
           # tags to generate
           tags: |
             type=ref,event=branch
@@ -129,7 +129,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           # the image to use as base for tags
-          image: "${{ vars.DOCKERHUB_USERNAME }}/sketched-server"
+          images: "${{ vars.DOCKERHUB_USERNAME }}/sketched-server"
           # tags to generate
           tags: |
             type=ref,event=branch

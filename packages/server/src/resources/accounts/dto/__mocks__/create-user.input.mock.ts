@@ -1,13 +1,12 @@
 import { mockUser } from '../../entities/__mocks__/user.entity.mock';
-import { UpdateUserInput } from '../update-user.input';
+import { CreateAccountInput } from '../create-account.input';
 
-export function mockUpdateUserInput(
-  overrides?: Partial<UpdateUserInput>,
-): UpdateUserInput {
+export function mockCreateUserInput(
+  overrides?: Partial<CreateAccountInput>,
+): CreateAccountInput {
   const user = mockUser();
 
   return {
-    id: user.id,
     email: user.email,
     name: user.name,
     image: user.image ?? undefined,

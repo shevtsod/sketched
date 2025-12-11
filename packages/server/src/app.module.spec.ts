@@ -1,5 +1,5 @@
 import { AppModule } from './app.module';
-import { CliModule } from './cli/cli.module';
+import { CliModule } from './common/cli/cli.module';
 import { createLogger } from './common/config/logger';
 
 vi.mock('./common/config/logger.js');

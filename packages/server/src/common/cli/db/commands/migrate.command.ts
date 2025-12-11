@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { CommandRunner, SubCommand } from 'nest-commander';
-import { DbManagementService } from '../../../common/db/db-management.service';
+import { DbManagementService } from '../../../db/db-management.service';
 
 @SubCommand({
   name: 'migrate',

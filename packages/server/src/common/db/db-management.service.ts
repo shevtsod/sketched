@@ -55,8 +55,16 @@ export class DbManagementService {
    */
   async seed(): Promise<void> {
     this.logger.log(`Seeding database ...`);
+
     // https://orm.drizzle.team/docs/seed-overview
-    await seed(this.drizzle.db, schema);
+    await seed(this.drizzle.db, schema).refine(() => ({
+      users: {
+        with: {
+          accounts: 3,
+        },
+      },
+    }));
+
     this.logger.log('Finished seeding database');
   }
 }

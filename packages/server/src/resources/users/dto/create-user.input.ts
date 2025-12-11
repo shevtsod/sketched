@@ -14,6 +14,6 @@ export class CreateUserInput {
 
   @IsOptional()
   @IsUrl()
-  @Field()
-  image?: string;
+  @Field({ nullable: true })
+  image?: string | null;
 }

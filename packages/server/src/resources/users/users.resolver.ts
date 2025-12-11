@@ -1,11 +1,20 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { and, asc, eq, gt, lt } from 'drizzle-orm';
-import { users } from '../../common/db/schema';
+import { accounts, users } from '../../common/db/schema';
 import { PaginationArgs } from '../../common/graphql/pagination/pagination.args';
 import {
   Direction,
   paginate,
 } from '../../common/graphql/pagination/pagination.util';
+import { AccountsService } from '../accounts/accounts.service';
+import { Account } from '../accounts/entities/account.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { FindUserInput } from './dto/find-user.input';
 import { FindUsersInput } from './dto/find-users.input';
@@ -16,13 +25,16 @@ import { UsersService } from './users.service';
 
 @Resolver(() => User)
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly accountsService: AccountsService,
+  ) {}
 
   @Mutation(() => User)
   async createUser(
     @Args('createUserInput') createUserInput: CreateUserInput,
   ): Promise<User> {
-    const res = await this.usersService.create(createUserInput);
+    const res = await this.usersService.create([createUserInput]);
     return res[0];
   }
 
@@ -77,5 +89,13 @@ export class UsersResolver {
   ): Promise<User> {
     const res = await this.usersService.delete(eq(users.id, id));
     return res[0];
+  }
+
+  @ResolveField(() => [Account])
+  async accounts(@Parent() user: User): Promise<Account[]> {
+    return this.accountsService.findMany({
+      // TODO: paginate
+      where: eq(accounts.userId, user.id),
+    });
   }
 }

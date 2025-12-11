@@ -29,7 +29,5 @@ export const accounts = pgTable('accounts', {
   /** Creation timestamp */
   createdAt: timestamp().notNull().defaultNow(),
   /** Update timestamp */
-  updatedAt: timestamp()
-    .notNull()
-    .$onUpdate(() => new Date()),
+  updatedAt: timestamp().$onUpdate(() => new Date()),
 });

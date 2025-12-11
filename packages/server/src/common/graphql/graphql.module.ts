@@ -17,7 +17,7 @@ import { join } from 'path';
         graphiql: configService.get<boolean>('isDevOrTest')
           ? { url: `graphql` }
           : false,
-        autoSchemaFile: join(process.cwd(), 'src/graphql/schema.gql'),
+        autoSchemaFile: join(process.cwd(), 'src/common/graphql/schema.gql'),
         // https://docs.nestjs.com/graphql/subscriptions
         subscriptions: {
           'graphql-ws': true,

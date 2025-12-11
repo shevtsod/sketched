@@ -6,6 +6,6 @@ import { CreateUserInput } from './create-user.input';
 export class UpdateUserInput extends PartialType(CreateUserInput) {
   @IsInt()
   @IsPositive()
-  @Field(() => ID)
+  @Field(() => ID, { description: 'Database ID (PK)' })
   id: number;
 }

@@ -1,13 +1,15 @@
-import { faker } from '@faker-js/faker';
+import { mockUser } from '../../entities/__mocks__/user.entity.mock';
 import { CreateUserInput } from '../create-user.input';
 
 export function mockCreateUserInput(
   overrides?: Partial<CreateUserInput>,
 ): CreateUserInput {
+  const user = mockUser();
+
   return {
-    email: faker.internet.email(),
-    name: faker.internet.username(),
-    image: faker.internet.url(),
+    email: user.email,
+    name: user.name,
+    image: user.image ?? undefined,
     ...overrides,
   };
 }

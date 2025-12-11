@@ -8,7 +8,7 @@ export function mockPaginationArgs(
 ): PaginationArgs {
   return {
     first: faker.number.int({ min: 1, max: PAGINATE_LIMIT_MAX }),
-    after: encodeCursor(faker.string.nanoid()),
+    after: encodeCursor(faker.string.uuid()),
     ...overrides,
   };
 }

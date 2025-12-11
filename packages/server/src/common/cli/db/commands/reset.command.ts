@@ -5,14 +5,14 @@ import {
   Option,
   SubCommand,
 } from 'nest-commander';
-import { DbManagementService } from '../../../common/db/db-management.service';
+import { DbManagementService } from '../../../db/db-management.service';
 
 @SubCommand({
-  name: 'drop',
-  description: 'Removes all existing data and tables',
+  name: 'reset',
+  description: 'Removes all existing data in all tables',
 })
-export class DropCommand extends CommandRunner {
-  private readonly logger = new Logger(DropCommand.name);
+export class ResetCommand extends CommandRunner {
+  private readonly logger = new Logger(ResetCommand.name);
 
   constructor(
     private readonly dbManagementService: DbManagementService,
@@ -50,7 +50,7 @@ export class DropCommand extends CommandRunner {
         throw new Error('Cancelled');
       }
 
-      await this.dbManagementService.drop();
+      await this.dbManagementService.reset();
     } catch (err) {
       this.logger.error({ err });
       throw err;

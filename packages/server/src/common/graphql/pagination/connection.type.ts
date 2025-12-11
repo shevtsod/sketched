@@ -1,5 +1,5 @@
 import { Type } from '@nestjs/common';
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Edge } from './edge.type';
 import { PageInfo } from './page-info';
 
@@ -32,7 +32,7 @@ export function ConnectionType<T>(
     @Field(() => PageInfo)
     pageInfo: PageInfo;
 
-    @Field(() => Int)
+    @Field()
     totalCount: number;
   }
 

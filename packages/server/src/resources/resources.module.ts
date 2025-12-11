@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { AccountsModule } from './accounts/accounts.module';
 import { UsersModule } from './users/users.module';
 
 /** List of modules of all resources (users, etc.) */
-const resourceModules = [UsersModule];
+const resourceModules = [AccountsModule, UsersModule];
 
 @Module({
   imports: [...resourceModules],

@@ -19,13 +19,60 @@ type User {
   createdAt: DateTime!
 
   """Update timestamp"""
-  updatedAt: DateTime!
+  updatedAt: DateTime
+
+  """User's accounts"""
+  accounts: [Account!]!
 }
 
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type Account {
+  """Database ID (PK)"""
+  id: ID!
+
+  """User ID (FK)"""
+  userId: Float!
+
+  """Account provider ID"""
+  providerId: String!
+
+  """Account ID in provider"""
+  accountId: String!
+
+  """Provider access token"""
+  accessToken: String
+
+  """Provider refresh token"""
+  refreshToken: String
+
+  """Provider access token expiration timestamp"""
+  accessTokenExpiresAt: DateTime
+
+  """Provider refresh token expiration timestamp"""
+  refreshTokenExpiresAt: DateTime
+
+  """Provider account access scopes"""
+  scope: String
+
+  """Provider ID token"""
+  idToken: String
+
+  """Account password (manual authentication)"""
+  password: String
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """Update timestamp"""
+  updatedAt: DateTime
+
+  """User this account belongs to"""
+  user: User!
+}
 
 type PageInfo {
   startCursor: String
@@ -42,12 +89,16 @@ type UserEdge {
 type UserConnection {
   edges: [UserEdge!]!
   pageInfo: PageInfo!
-  totalCount: Int!
+  totalCount: Float!
 }
 
 type Query {
-  users(first: Float, after: String, last: Float, before: String, findUsersInput: FindUsersInput): UserConnection!
   user(findUserInput: FindUserInput!): User!
+  users(first: Float, after: String, last: Float, before: String, findUsersInput: FindUsersInput): UserConnection!
+}
+
+input FindUserInput {
+  id: ID!
 }
 
 input FindUsersInput {
@@ -57,10 +108,6 @@ input FindUsersInput {
   image: String
   createdAt: DateTime
   updatedAt: DateTime
-}
-
-input FindUserInput {
-  id: ID!
 }
 
 type Mutation {

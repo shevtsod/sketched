@@ -1,22 +1,51 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsDate,
+  IsEmail,
+  IsInt,
+  IsOptional,
+  IsPositive,
+  IsUrl,
+  Length,
+} from 'class-validator';
+import * as types from '../../../utils/types';
+import { Account } from '../../accounts/entities/account.entity';
 
 @ObjectType()
 export class User {
+  @IsInt()
+  @IsPositive()
   @Field(() => ID, { description: 'Database ID (PK)' })
   id: number;
 
-  @Field(() => String, { description: 'Email address' })
+  @Length(1, 256)
+  @IsEmail()
+  @Field({ description: 'Email address' })
   email: string;
 
-  @Field(() => String, { description: 'Display name' })
+  @Length(1, 256)
+  @Field({ description: 'Display name' })
   name: string;
 
+  @IsOptional()
+  @IsUrl()
   @Field(() => String, { nullable: true, description: 'Image URL' })
-  image: string | null;
+  image?: string | null;
 
-  @Field(() => Date, { description: 'Creation timestamp' })
+  @IsDate()
+  @Type(() => Date)
+  @Field({ description: 'Creation timestamp' })
   createdAt: Date;
 
-  @Field(() => Date, { description: 'Update timestamp' })
-  updatedAt?: Date;
+  @IsDate()
+  @Type(() => Date)
+  @Field(() => Date, { nullable: true, description: 'Update timestamp' })
+  updatedAt: Date | null;
+
+  @IsOptional()
+  @IsArray()
+  @Field(() => [Account], { description: "User's accounts" })
+  accounts?: types.WrapperType<Account>;
 }

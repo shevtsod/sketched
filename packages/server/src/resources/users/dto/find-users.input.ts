@@ -15,34 +15,34 @@ export class FindUsersInput {
   @IsOptional()
   @IsInt()
   @IsPositive()
-  @Field(() => ID, { nullable: true })
+  @Field(() => ID)
   id?: number;
 
   @IsOptional()
   @Length(1, 256)
   @IsEmail()
-  @Field(() => String, { nullable: true })
+  @Field()
   email?: string;
 
   @IsOptional()
   @Length(1, 256)
-  @Field(() => String, { nullable: true })
+  @Field()
   name?: string;
 
   @IsOptional()
   @IsUrl()
-  @Field(() => String, { nullable: true })
+  @Field({ nullable: true })
   image?: string | null;
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  @Field(() => Date, { nullable: true })
+  @Field()
   createdAt?: Date;
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  @Field(() => Date, { nullable: true })
-  updatedAt?: Date;
+  @Field({ nullable: true })
+  updatedAt?: Date | null;
 }

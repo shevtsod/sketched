@@ -5,7 +5,7 @@ import { env } from './src/common/config/env';
 // https://orm.drizzle.team/docs/drizzle-config-file
 export default defineConfig({
   out: './drizzle',
-  schema: './src/db/schema',
+  schema: './src/common/db/schema',
   dialect: 'postgresql',
   casing: 'snake_case',
   dbCredentials: {

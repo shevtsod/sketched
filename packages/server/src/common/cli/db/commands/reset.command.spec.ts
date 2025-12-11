@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { InquirerService } from 'nest-commander';
 import { Mocked } from 'vitest';
-import { mockDbManagementService } from '../../../common/db/__mocks__/db-management.service';
-import { DbManagementService } from '../../../common/db/db-management.service';
+import { mockDbManagementService } from '../../../db/__mocks__/db-management.service';
+import { DbManagementService } from '../../../db/db-management.service';
 import { mockInquirerService } from '../../__mocks__/inquirer.service.mock';
 import { ResetCommand } from './reset.command';
 

@@ -68,7 +68,7 @@ describe('UsersResolver', () => {
   it('should create a User', async () => {
     const input = mockCreateUserInput();
     await resolver.createUser(input);
-    expect(usersService.create).toHaveBeenCalledWith(input);
+    expect(usersService.create).toHaveBeenCalledWith([input]);
   });
 
   it('should find one User', async () => {

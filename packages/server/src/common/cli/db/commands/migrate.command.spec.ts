@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { Mocked } from 'vitest';
-import { mockDbManagementService } from '../../../common/db/__mocks__/db-management.service';
-import { DbManagementService } from '../../../common/db/db-management.service';
+import { mockDbManagementService } from '../../../db/__mocks__/db-management.service';
+import { DbManagementService } from '../../../db/db-management.service';
 import { MigrateCommand } from './migrate.command';
 
 describe('MigrateCommand', () => {

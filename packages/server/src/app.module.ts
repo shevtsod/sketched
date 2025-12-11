@@ -1,7 +1,7 @@
 import { DynamicModule, ForwardReference, Module, Type } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
-import { CliModule } from './cli/cli.module';
+import { CliModule } from './common/cli/cli.module';
 import { getEnv } from './common/config/env';
 import { createHttpLogger, createLogger } from './common/config/logger';
 import { GraphQLModule } from './common/graphql/graphql.module';

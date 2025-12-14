@@ -1,11 +1,9 @@
-import { Field, ID, InputType, PartialType } from '@nestjs/graphql';
-import { IsInt, IsPositive } from 'class-validator';
-import { CreateUserInput } from './create-user.input';
+import { InputType, OmitType } from '@nestjs/graphql';
+import { User } from '../entities/user.entity';
 
 @InputType()
-export class UpdateUserInput extends PartialType(CreateUserInput) {
-  @IsInt()
-  @IsPositive()
-  @Field(() => ID, { description: 'Database ID (PK)' })
-  id: number;
-}
+export class UpdateUserInput extends OmitType(
+  User,
+  ['createdAt', 'updatedAt'],
+  InputType,
+) {}

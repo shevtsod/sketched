@@ -1,7 +1,6 @@
 import { Test } from '@nestjs/testing';
-import { DrizzleQueryError } from 'drizzle-orm';
 import { Mocked } from 'vitest';
-import { mockDbManagementService } from '../../../db/__mocks__/db-management.service';
+import { mockDbManagementService } from '../../../db/__mocks__/db-management.service.mock';
 import { DbManagementService } from '../../../db/db-management.service';
 import { SeedCommand } from './seed.command';
 
@@ -32,14 +31,6 @@ describe('SeedCommand', () => {
   it('should run', async () => {
     await command.run([]);
     expect(dbManagementService.seed).toHaveBeenCalled();
-  });
-
-  it('should handle DrizzleQueryError when run fails', async () => {
-    const error = new DrizzleQueryError('Test Error', []);
-    dbManagementService.seed.mockImplementationOnce(() => {
-      throw error;
-    });
-    await expect(command.run([])).resolves.toBeUndefined();
   });
 
   it('should throw when run fails', async () => {

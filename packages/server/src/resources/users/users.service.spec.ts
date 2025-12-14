@@ -1,9 +1,8 @@
 import { Test } from '@nestjs/testing';
-import { and, eq } from 'drizzle-orm';
 import { Mocked } from 'vitest';
-import { createMockDbService } from '../../common/db/__mocks__/db.service.mock';
-import { DbService } from '../../common/db/db.service';
-import { users } from '../../common/db/schema';
+import { createMockPrismaService } from '../../common/db/__mocks__/prisma.service.mock';
+import { PrismaService } from '../../common/db/prisma.service';
+import { mockPaginationArgs } from '../../common/graphql/pagination/__mocks__/pagination.args.mock';
 import { mockCreateUserInput } from './dto/__mocks__/create-user.input.mock';
 import { mockFindUserInput } from './dto/__mocks__/find-user.input.mock';
 import { mockFindUsersInput } from './dto/__mocks__/find-users.input.mock';
@@ -12,25 +11,25 @@ import { mockUser } from './entities/__mocks__/user.entity.mock';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
-const mockDbService = createMockDbService(mockUser);
+const mockPrismaService = createMockPrismaService('user', mockUser);
 
 describe('UsersService', () => {
   let service: UsersService;
-  let dbService: Mocked<DbService>;
+  let prismaService: Mocked<PrismaService>;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
         UsersService,
         {
-          provide: DbService,
-          useValue: mockDbService,
+          provide: PrismaService,
+          useValue: mockPrismaService,
         },
       ],
     }).compile();
 
     service = module.get(UsersService);
-    dbService = module.get<Mocked<DbService>>(DbService);
+    prismaService = module.get<Mocked<PrismaService>>(PrismaService);
   });
 
   it('should be defined', () => {
@@ -39,83 +38,102 @@ describe('UsersService', () => {
 
   it('should create a User', async () => {
     const input = mockCreateUserInput();
-    mockDbService.create.mockResolvedValueOnce(input as User);
-    const res = await service.create([input]);
-    expect(dbService.create).toHaveBeenCalledWith(users, [input]);
-    expect(res).toEqual(expect.objectContaining(input));
+    const options = { data: input };
+    mockPrismaService.user?.createManyAndReturn.mockResolvedValueOnce([
+      input,
+    ] as User[]);
+    const res = await service.create(options);
+    expect(prismaService.user.createManyAndReturn).toHaveBeenCalledWith(
+      options,
+    );
+
+    for (const item of res) {
+      expect(item).toEqual(expect.objectContaining(input));
+    }
   });
 
   it('should find one User', async () => {
     const input = mockFindUserInput();
-    const options = {
-      where: and(...Object.entries(input).map(([k, v]) => eq(users[k], v))),
-    };
-    mockDbService.findOne.mockResolvedValueOnce(input as User);
+    const options = { where: input };
+    mockPrismaService.user?.findFirst.mockResolvedValueOnce(input as User);
     const res = await service.findOne(options);
-    expect(dbService.findOne).toHaveBeenCalledWith(users, options);
+    expect(prismaService.user.findFirst).toHaveBeenCalledWith(options);
     expect(res).toEqual(expect.objectContaining(input));
   });
 
   it('should find many Users', async () => {
     const input = mockFindUsersInput();
-    const options = {
-      where: and(...Object.entries(input).map(([k, v]) => eq(users[k], v))),
-    };
-    mockDbService.findMany.mockResolvedValueOnce([input] as User[]);
+    const options = { where: input };
+    mockPrismaService.user?.findMany.mockResolvedValueOnce([input] as User[]);
     const res = await service.findMany(options);
-    expect(dbService.findMany).toHaveBeenCalledWith(users, options);
+    expect(mockPrismaService.user?.findMany).toHaveBeenCalledWith(options);
 
     for (const item of res) {
       expect(item).toEqual(expect.objectContaining(input));
     }
+    ``;
   });
 
-  it('should find many Users with count', async () => {
+  it('should paginate', async () => {
     const input = mockFindUsersInput();
-    const options = {
-      where: and(...Object.entries(input).map(([k, v]) => eq(users[k], v))),
-    };
-    mockDbService.findManyWithCount.mockResolvedValueOnce([[input], 1] as [
-      User[],
-      number,
-    ]);
-    const [res, count] = await service.findManyWithCount(options, options);
-    expect(dbService.findManyWithCount).toHaveBeenCalledWith(
-      users,
-      options,
-      options,
+    const options = { where: input };
+    const paginationArgs = mockPaginationArgs();
+    mockPrismaService.user?.findMany.mockResolvedValueOnce([input] as User[]);
+    mockPrismaService.user?.count.mockResolvedValueOnce(1);
+    const res = await service.paginate(paginationArgs, options);
+    expect(mockPrismaService.user?.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ...options,
+        take: expect.toSatisfy((v) => v >= 0),
+        skip: expect.toBeOneOf([0, 1]),
+        cursor: expect.toBeOneOf([{ id: expect.any(String) }, undefined]),
+        orderBy: { id: 'asc' },
+      }),
+    );
+    expect(mockPrismaService.user?.count).toHaveBeenCalledWith(options);
+    expect(res).toEqual(
+      expect.objectContaining({
+        edges: expect.any(Array),
+        pageInfo: expect.objectContaining({
+          startCursor: expect.any(String),
+          endCursor: expect.any(String),
+        }),
+        totalCount: expect.any(Number),
+      }),
     );
 
-    for (const item of res) {
-      expect(item).toEqual(expect.objectContaining(input));
+    for (const edge of res.edges) {
+      expect(edge.cursor).toEqual(expect.any(String));
+      expect(edge.node).toEqual(expect.objectContaining(input));
     }
 
-    expect(count).toBe(res.length);
+    expect(res.edges.length).toBe(1);
   });
 
   it('should update Users', async () => {
-    const input = mockFindUsersInput();
-    const where = and(
-      ...Object.entries(input).map(([k, v]) => eq(users[k], v)),
+    const findInput = mockFindUsersInput();
+    const updateInput = mockUpdateUserInput();
+    const options = { where: findInput, data: updateInput };
+    mockPrismaService.user?.updateManyAndReturn.mockResolvedValueOnce([
+      findInput,
+    ] as User[]);
+    const res = await service.update(options);
+    expect(mockPrismaService.user?.updateManyAndReturn).toHaveBeenCalledWith(
+      options,
     );
-    const set = mockUpdateUserInput();
-    mockDbService.update.mockResolvedValueOnce([input] as User[]);
-    const res = await service.update(where, set);
-    expect(dbService.update).toHaveBeenCalledWith(users, where, set);
 
     for (const item of res) {
-      expect(item).toEqual(expect.objectContaining(input));
+      expect(item).toEqual(expect.objectContaining(findInput));
     }
   });
 
   it('should delete Users', async () => {
     const input = mockFindUsersInput();
-    const where = and(
-      ...Object.entries(input).map(([k, v]) => eq(users[k], v)),
-    );
-    mockDbService.delete.mockResolvedValueOnce([input] as User[]);
-    const res = await service.delete(where);
-    expect(dbService.delete).toHaveBeenCalledWith(users, where);
+    const options = { where: input };
+    mockPrismaService.user?.findMany.mockResolvedValueOnce([input] as User[]);
+    const res = await service.delete(options);
+    expect(mockPrismaService.user?.findMany).toHaveBeenCalledWith(options);
+    expect(mockPrismaService.user?.deleteMany).toHaveBeenCalledWith(options);
 
     for (const item of res) {
       expect(item).toEqual(expect.objectContaining(input));
@@ -123,11 +141,11 @@ describe('UsersService', () => {
   });
 
   it('should count Users', async () => {
-    const where = and(
-      ...Object.entries(mockFindUsersInput()).map(([k, v]) => eq(users[k], v)),
-    );
-    const res = await service.count(where);
-    expect(dbService.count).toHaveBeenCalledWith(users, where);
+    const input = mockFindUsersInput();
+    const options = { where: input };
+    const res = await service.count(options);
+    mockPrismaService.user?.count.mockResolvedValueOnce(1);
+    expect(mockPrismaService.user?.count).toHaveBeenCalledWith(options);
     expect(res).toBeGreaterThan(0);
   });
 });

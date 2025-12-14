@@ -12,9 +12,9 @@ import { join } from 'path';
       driver: ApolloDriver,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: (config: ConfigService) => ({
         playground: false,
-        graphiql: configService.get<boolean>('isDevOrTest')
+        graphiql: config.get<boolean>('isDevOrTest')
           ? { url: `graphql` }
           : false,
         autoSchemaFile: join(process.cwd(), 'src/common/graphql/schema.gql'),

@@ -1,15 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { sql } from 'drizzle-orm';
-import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import { reset, seed } from 'drizzle-seed';
-import { schema } from '.';
-import { DrizzleService } from './drizzle.service';
+import { execa } from 'execa';
+import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class DbManagementService {
   private readonly logger = new Logger(DbManagementService.name);
 
-  constructor(private drizzle: DrizzleService) {}
+  constructor(private prisma: PrismaService) {}
 
   /**
    * Drops all existing database tables and migrations
@@ -17,53 +14,45 @@ export class DbManagementService {
   async drop(): Promise<void> {
     this.logger.log(`Dropping database ...`);
 
-    for (const schema of ['public', 'drizzle']) {
-      this.logger.log(`Dropping schema "${schema}" ...`);
-      await this.drizzle.db.execute(sql.raw(`DROP SCHEMA ${schema} CASCADE`));
-      await this.drizzle.db.execute(sql.raw(`CREATE SCHEMA ${schema}`));
-    }
+    const schema = 'public';
+    await this.prisma.$executeRawUnsafe(`DROP SCHEMA ${schema} CASCADE`);
+    await this.prisma.$executeRawUnsafe(`CREATE SCHEMA ${schema}`);
 
     this.logger.log('Finished dropping database');
   }
 
   /**
    * Runs database migrations
-   *
-   * @see {@link https://orm.drizzle.team/docs/migrations}
    */
   async migrate(): Promise<void> {
     this.logger.log(`Migrating database ...`);
-    await migrate(this.drizzle.db, { migrationsFolder: './drizzle' });
+
+    const { stdout } = await execa`npm run prisma migrate`;
+    this.logger.log(stdout);
+
     this.logger.log(`Finished migrating database`);
   }
 
   /**
    * Removes existing data in database tables
-   *
-   * @see {@link https://orm.drizzle.team/docs/seed-overview#reset-database}
    */
   async reset(): Promise<void> {
     this.logger.log(`Resetting database ...`);
-    await reset(this.drizzle.db, schema);
+
+    const { stdout } = await execa`npm run prisma migrate reset`;
+    this.logger.log(stdout);
+
     this.logger.log('Finished resetting database');
   }
 
   /**
    * Seeds the database with dummy records
-   *
-   * @see {@link https://orm.drizzle.team/docs/seed-overview}
    */
   async seed(): Promise<void> {
     this.logger.log(`Seeding database ...`);
 
-    // https://orm.drizzle.team/docs/seed-overview
-    await seed(this.drizzle.db, schema).refine(() => ({
-      users: {
-        with: {
-          accounts: 3,
-        },
-      },
-    }));
+    const { stdout } = await execa`npm run prisma db seed`;
+    this.logger.log(stdout);
 
     this.logger.log('Finished seeding database');
   }

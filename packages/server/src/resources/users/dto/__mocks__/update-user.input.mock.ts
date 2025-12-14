@@ -4,13 +4,6 @@ import { UpdateUserInput } from '../update-user.input';
 export function mockUpdateUserInput(
   overrides?: Partial<UpdateUserInput>,
 ): UpdateUserInput {
-  const user = mockUser();
-
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    image: user.image ?? undefined,
-    ...overrides,
-  };
+  const { createdAt, updatedAt, ...user } = mockUser();
+  return { ...user, ...overrides };
 }

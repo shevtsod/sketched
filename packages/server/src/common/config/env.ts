@@ -21,6 +21,10 @@ const EnvSchema = z
     BASE_PATH: z.string().default(''),
     /** Secret for hashing and signing keys, passwords, etc. */
     SECRET: z.string().default('change-me'),
+    /** Default admin user email address */
+    ADMIN_EMAIL: z.string().default('root@localhost'),
+    /** Default admin user password */
+    ADMIN_PASSWORD: z.string().default('change-me'),
 
     /** Database hostname or IP address */
     DB_HOST: z.string().default('127.0.0.1'),
@@ -65,8 +69,12 @@ const EnvSchema = z
         : ['development', 'test'].includes(val.NODE_ENV)
           ? 'debug'
           : 'info',
+
     /** True if environment in ["development", "test"] */
     isDevOrTest: ['development', 'test'].includes(val.NODE_ENV),
+
+    /** Merge database credentials */
+    DATABASE_URL: `postgresql://${val.DB_USER}:${val.DB_PASSWORD}@${val.DB_HOST}:${val.DB_PORT}/${val.DB_NAME}`,
   }));
 
 export type EnvSchemaType = z.infer<typeof EnvSchema>;

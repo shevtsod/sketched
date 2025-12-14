@@ -19,24 +19,22 @@ export class ObjectStoreService {
   private readonly bucket: string;
   private readonly urlExpiration: number;
 
-  constructor(private readonly configService: ConfigService) {
-    this.endpoint = configService.get<string>('STORAGE_ENDPOINT')!;
+  constructor(private readonly config: ConfigService) {
+    this.endpoint = config.get<string>('STORAGE_ENDPOINT')!;
 
     // https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-s3
     this.s3 = new S3Client({
       endpoint: this.endpoint,
-      region: configService.get<string>('STORAGE_REGION'),
+      region: config.get<string>('STORAGE_REGION'),
       forcePathStyle: !this.endpoint?.endsWith('amazonaws.com'),
       credentials: {
-        accessKeyId: configService.get<string>('STORAGE_ACCESS_KEY_ID')!,
-        secretAccessKey: configService.get<string>(
-          'STORAGE_SECRET_ACCESS_KEY',
-        )!,
+        accessKeyId: config.get<string>('STORAGE_ACCESS_KEY_ID')!,
+        secretAccessKey: config.get<string>('STORAGE_SECRET_ACCESS_KEY')!,
       },
     });
 
-    this.bucket = configService.get<string>('STORAGE_BUCKET')!;
-    this.urlExpiration = configService.get<number>('STORAGE_URL_EXPIRATION')!;
+    this.bucket = config.get<string>('STORAGE_BUCKET')!;
+    this.urlExpiration = config.get<number>('STORAGE_URL_EXPIRATION')!;
   }
 
   /**

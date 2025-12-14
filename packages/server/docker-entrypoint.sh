@@ -17,11 +17,7 @@ echo "Waiting for cache at \"$CACHE_HOST:$CACHE_PORT\" ..."
 ./wait-for "$CACHE_HOST:$CACHE_PORT"
 
 npm run cli db migrate
-
-# Seed database only in some environments
-if [ "$NODE_ENV" = "development" ] || [ "$NODE_ENV" = "test" ]; then
-  npm run cli db seed
-fi
+npm run cli db seed
 
 # Start the app
 exec "$@"

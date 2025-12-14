@@ -15,7 +15,7 @@ export class ResetCommand extends CommandRunner {
   private readonly logger = new Logger(ResetCommand.name);
 
   constructor(
-    private readonly dbManagementService: DbManagementService,
+    private readonly dbMgmt: DbManagementService,
     private readonly inquirerService: InquirerService,
   ) {
     super();
@@ -50,10 +50,10 @@ export class ResetCommand extends CommandRunner {
         throw new Error('Cancelled');
       }
 
-      await this.dbManagementService.reset();
-    } catch (err) {
-      this.logger.error({ err });
-      throw err;
+      await this.dbMgmt.reset();
+    } catch (error) {
+      this.logger.error({ error });
+      throw error;
     }
   }
 }

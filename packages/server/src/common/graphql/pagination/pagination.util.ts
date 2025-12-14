@@ -1,3 +1,4 @@
+import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { Connection } from './connection.type';
 import { CursorType, decodeCursor, encodeCursor } from './cursor.util';
 import { Edge } from './edge.type';
@@ -40,21 +41,28 @@ export type FetchFunc<T, C extends CursorType> = (
   cursor?: C,
 ) => [T[], number] | Promise<[T[], number]>;
 
+export interface PaginateOptions<T> {
+  /** Optional class to convert edges into instances of */
+  transformClass?: ClassConstructor<T>;
+}
+
 /**
  * Returns a Relay-style Connection object representing a page of records
  * and pagination metadata for cursor-based pagination
  *
- * @param pagination pagination arguments (direction and cursor)
+ * @param paginationArgs pagination arguments (direction and cursor)
  * @param cursorFunc callback to retrieve the cursor for a given record
  * @param fetchFunc callback to retrieve records for the current page and total number of records
  * @returns Connection of records and pagination metadata for this page
  */
 export async function paginate<T, C extends CursorType>(
-  pagination: PaginationArgs,
+  paginationArgs: PaginationArgs,
   cursorFunc: CursorFunc<T, C>,
   fetchFunc: FetchFunc<T, C>,
+  opts?: PaginateOptions<T>,
 ): Promise<Connection<T>> {
-  const { first, after, last, before } = pagination;
+  const { first, after, last, before } = paginationArgs;
+  const { transformClass } = opts ?? {};
 
   if (first && last) {
     throw new PaginationArgsError(
@@ -106,7 +114,7 @@ export async function paginate<T, C extends CursorType>(
     : rows;
 
   const edges: Edge<T>[] = items.map((node) => ({
-    node,
+    node: transformClass ? plainToInstance(transformClass, node) : node,
     cursor: encodeCursor(cursorFunc(node)),
   }));
 

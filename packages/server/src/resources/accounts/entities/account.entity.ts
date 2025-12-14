@@ -1,7 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Exclude } from 'class-transformer';
-import * as types from '../../../utils/types';
-import { User } from '../../users/entities/user.entity';
 
 @ObjectType()
 export class Account {
@@ -19,53 +17,50 @@ export class Account {
 
   @Exclude()
   @Field(() => String, { nullable: true, description: 'Provider access token' })
-  accessToken: string | null;
+  accessToken?: string | null;
 
   @Exclude()
   @Field(() => String, {
     nullable: true,
     description: 'Provider refresh token',
   })
-  refreshToken: string | null;
+  refreshToken?: string | null;
 
   @Field(() => Date, {
     nullable: true,
     description: 'Provider access token expiration timestamp',
   })
-  accessTokenExpiresAt: Date | null;
+  accessTokenExpiresAt?: Date | null;
 
   @Field(() => Date, {
     nullable: true,
     description: 'Provider refresh token expiration timestamp',
   })
-  refreshTokenExpiresAt: Date | null;
+  refreshTokenExpiresAt?: Date | null;
 
   @Exclude()
   @Field(() => String, {
     nullable: true,
     description: 'Provider account access scopes',
   })
-  scope: string | null;
+  scope?: string | null;
 
   @Exclude()
   @Field(() => String, { nullable: true, description: 'Provider ID token' })
-  idToken: string | null;
+  idToken?: string | null;
 
   @Exclude()
   @Field(() => String, {
     nullable: true,
     description: 'Account password (manual authentication)',
   })
-  password: string | null;
+  password?: string | null;
 
   @Field({ description: 'Creation timestamp' })
   createdAt: Date;
 
   @Field(() => Date, { nullable: true, description: 'Update timestamp' })
-  updatedAt: Date | null;
-
-  @Field(() => User, { description: 'User this account belongs to' })
-  user?: types.WrapperType<User>;
+  updatedAt?: Date | null;
 
   constructor(partial: Partial<Account>) {
     Object.assign(this, partial);

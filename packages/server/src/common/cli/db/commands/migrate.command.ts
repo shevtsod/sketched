@@ -9,7 +9,7 @@ import { DbManagementService } from '../../../db/db-management.service';
 export class MigrateCommand extends CommandRunner {
   private readonly logger = new Logger(MigrateCommand.name);
 
-  constructor(private readonly dbManagementService: DbManagementService) {
+  constructor(private readonly dbMgmt: DbManagementService) {
     super();
   }
 
@@ -18,10 +18,10 @@ export class MigrateCommand extends CommandRunner {
     options?: Record<string, any>,
   ): Promise<void> {
     try {
-      await this.dbManagementService.migrate();
-    } catch (err) {
-      this.logger.error({ err });
-      throw err;
+      await this.dbMgmt.migrate();
+    } catch (error) {
+      this.logger.error({ error });
+      throw error;
     }
   }
 }

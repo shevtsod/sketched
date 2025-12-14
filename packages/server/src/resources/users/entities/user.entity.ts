@@ -1,7 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsDate,
   IsEmail,
   IsInt,
@@ -10,8 +9,6 @@ import {
   IsUrl,
   Length,
 } from 'class-validator';
-import * as types from '../../../utils/types';
-import { Account } from '../../accounts/entities/account.entity';
 
 @ObjectType()
 export class User {
@@ -43,9 +40,4 @@ export class User {
   @Type(() => Date)
   @Field(() => Date, { nullable: true, description: 'Update timestamp' })
   updatedAt: Date | null;
-
-  @IsOptional()
-  @IsArray()
-  @Field(() => [Account], { description: "User's accounts" })
-  accounts?: types.WrapperType<Account>;
 }

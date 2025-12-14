@@ -10,7 +10,7 @@ export default defineConfig({
     root: './',
     clearMocks: true,
     coverage: {
-      exclude: ['**/__mocks__/**'],
+      exclude: ['**/__mocks__/**', '**/generated/prisma/**'],
     },
   },
   plugins: [

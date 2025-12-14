@@ -15,7 +15,7 @@ export class DropCommand extends CommandRunner {
   private readonly logger = new Logger(DropCommand.name);
 
   constructor(
-    private readonly dbManagementService: DbManagementService,
+    private readonly dbMgmt: DbManagementService,
     private readonly inquirerService: InquirerService,
   ) {
     super();
@@ -50,10 +50,10 @@ export class DropCommand extends CommandRunner {
         throw new Error('Cancelled');
       }
 
-      await this.dbManagementService.drop();
-    } catch (err) {
-      this.logger.error({ err });
-      throw err;
+      await this.dbMgmt.drop();
+    } catch (error) {
+      this.logger.error({ error });
+      throw error;
     }
   }
 }

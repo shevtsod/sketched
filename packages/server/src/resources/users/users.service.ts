@@ -1,51 +1,67 @@
 import { Injectable } from '@nestjs/common';
-import { Tail } from 'rxjs';
-import { DbService } from '../../common/db/db.service';
-import { users } from '../../common/db/schema';
+import { UserFindManyArgs } from '../../common/db/generated/prisma/models';
+import { PrismaService } from '../../common/db/prisma.service';
+import { PaginationArgs } from '../../common/graphql/pagination/pagination.args';
+import {
+  Direction,
+  paginate,
+  PaginateOptions,
+} from '../../common/graphql/pagination/pagination.util';
+import { User } from './entities/user.entity';
+import { UserConnection } from './users.connection';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly dbService: DbService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  create(
-    ...args: Tail<Parameters<typeof this.dbService.create<typeof users>>>
-  ) {
-    return this.dbService.create(users, ...args);
+  create(...args: Parameters<typeof this.prisma.user.createManyAndReturn>) {
+    return this.prisma.user.createManyAndReturn(...args);
   }
 
-  findOne(
-    ...args: Tail<Parameters<typeof this.dbService.findOne<typeof users>>>
-  ) {
-    return this.dbService.findOne(users, ...args);
+  findOne(...args: Parameters<typeof this.prisma.user.findFirst>) {
+    return this.prisma.user.findFirst(...args);
   }
 
-  findMany(
-    ...args: Tail<Parameters<typeof this.dbService.findMany<typeof users>>>
-  ) {
-    return this.dbService.findMany(users, ...args);
+  findMany(...args: Parameters<typeof this.prisma.user.findMany>) {
+    return this.prisma.user.findMany(...args);
   }
 
-  findManyWithCount(
-    ...args: Tail<
-      Parameters<typeof this.dbService.findManyWithCount<typeof users>>
-    >
-  ) {
-    return this.dbService.findManyWithCount(users, ...args);
+  paginate(
+    paginationArgs: PaginationArgs,
+    args: Pick<UserFindManyArgs, 'where' | 'include'>,
+    paginateOptions?: PaginateOptions<User>,
+  ): Promise<UserConnection> {
+    const { where } = args;
+
+    return paginate(
+      paginationArgs,
+      (user) => user.id,
+      (limit, direction, cursor) =>
+        this.prisma.$transaction([
+          this.findMany({
+            ...args,
+            take: direction === Direction.ASC ? limit : -limit,
+            skip: cursor !== undefined ? 1 : 0,
+            cursor: cursor ? { id: cursor } : undefined,
+            orderBy: { id: 'asc' },
+          }),
+          this.count({ where }),
+        ]),
+      paginateOptions,
+    );
   }
 
-  update(
-    ...args: Tail<Parameters<typeof this.dbService.update<typeof users>>>
-  ) {
-    return this.dbService.update<typeof users>(users, ...args);
+  update(...args: Parameters<typeof this.prisma.user.updateManyAndReturn>) {
+    return this.prisma.user.updateManyAndReturn(...args);
   }
 
-  delete(
-    ...args: Tail<Parameters<typeof this.dbService.delete<typeof users>>>
-  ) {
-    return this.dbService.delete(users, ...args);
+  async delete(...args: Parameters<typeof this.prisma.user.deleteMany>) {
+    const res = await this.findMany(...args);
+    await this.prisma.user.deleteMany(...args);
+    return res;
   }
 
-  count(...args: Tail<Parameters<typeof this.dbService.count<typeof users>>>) {
-    return this.dbService.count(users, ...args);
+  count(...args: Parameters<typeof this.prisma.user.count>) {
+    return this.prisma.user.count(...args);
   }
 }

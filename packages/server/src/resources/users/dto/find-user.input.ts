@@ -1,10 +1,5 @@
-import { Field, ID, InputType } from '@nestjs/graphql';
-import { IsInt, IsPositive } from 'class-validator';
+import { InputType, PickType } from '@nestjs/graphql';
+import { User } from '../entities/user.entity';
 
 @InputType()
-export class FindUserInput {
-  @IsInt()
-  @IsPositive()
-  @Field(() => ID)
-  id: number;
-}
+export class FindUserInput extends PickType(User, ['id'], InputType) {}

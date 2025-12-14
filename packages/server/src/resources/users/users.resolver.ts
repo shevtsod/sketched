@@ -6,14 +6,11 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { and, asc, eq, gt, lt } from 'drizzle-orm';
-import { accounts, users } from '../../common/db/schema';
+import { plainToInstance } from 'class-transformer';
 import { PaginationArgs } from '../../common/graphql/pagination/pagination.args';
-import {
-  Direction,
-  paginate,
-} from '../../common/graphql/pagination/pagination.util';
+import { AccountConnection } from '../accounts/accounts.connection';
 import { AccountsService } from '../accounts/accounts.service';
+import { FindAccountsInput } from '../accounts/dto/find-accounts.input';
 import { Account } from '../accounts/entities/account.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { FindUserInput } from './dto/find-user.input';
@@ -34,44 +31,27 @@ export class UsersResolver {
   async createUser(
     @Args('createUserInput') createUserInput: CreateUserInput,
   ): Promise<User> {
-    const res = await this.usersService.create([createUserInput]);
-    return res[0];
+    const res = await this.usersService.create({ data: createUserInput });
+    return plainToInstance(User, res[0]);
   }
 
   @Query(() => User)
-  user(
-    @Args('findUserInput') { id }: FindUserInput,
-  ): Promise<User | undefined> {
-    return this.usersService.findOne({ where: eq(users.id, id) });
+  async user(
+    @Args('findUserInput') findUserInput: FindUserInput,
+  ): Promise<User | null> {
+    const res = this.usersService.findOne({ where: findUserInput });
+    return plainToInstance(User, res);
   }
 
   @Query(() => UserConnection)
-  async users(
-    @Args() pagination: PaginationArgs,
+  users(
+    @Args() paginationArgs: PaginationArgs,
     @Args('findUsersInput', { nullable: true }) findUsersInput?: FindUsersInput,
   ): Promise<UserConnection> {
-    const where = and(
-      ...Object.entries(findUsersInput ?? {}).map(([k, v]) => eq(users[k], v)),
-    );
-
-    return paginate(
-      pagination,
-      (user) => user.id,
-      (limit, direction, cursor) => {
-        const operator = direction === Direction.ASC ? gt : lt;
-        const whereId = cursor ? operator(users.id, cursor) : undefined;
-
-        return this.usersService.findManyWithCount(
-          {
-            where: and(where, whereId),
-            limit,
-            orderBy: asc(users.id),
-          },
-          {
-            where,
-          },
-        );
-      },
+    return this.usersService.paginate(
+      paginationArgs,
+      { where: findUsersInput },
+      { transformClass: User },
     );
   }
 
@@ -79,23 +59,32 @@ export class UsersResolver {
   async updateUser(
     @Args('updateUserInput') { id, ...updateUserInput }: UpdateUserInput,
   ): Promise<User> {
-    const res = this.usersService.update(eq(users.id, id), updateUserInput);
-    return res[0];
+    const res = this.usersService.update({
+      where: { id },
+      data: updateUserInput,
+    });
+    return plainToInstance(User, res[0]);
   }
 
   @Mutation(() => User)
   async deleteUser(
-    @Args('findUserInput') { id }: FindUserInput,
+    @Args('findUserInput') findUserInput: FindUserInput,
   ): Promise<User> {
-    const res = await this.usersService.delete(eq(users.id, id));
-    return res[0];
+    const res = await this.usersService.delete({ where: findUserInput });
+    return plainToInstance(User, res[0]);
   }
 
-  @ResolveField(() => [Account])
-  async accounts(@Parent() user: User): Promise<Account[]> {
-    return this.accountsService.findMany({
-      // TODO: paginate
-      where: eq(accounts.userId, user.id),
-    });
+  @ResolveField(() => AccountConnection)
+  accounts(
+    @Parent() user: User,
+    @Args() paginationArgs: PaginationArgs,
+    @Args('findAccountsInput', { nullable: true })
+    findAccountsInput?: FindAccountsInput,
+  ): Promise<AccountConnection> {
+    return this.accountsService.paginate(
+      paginationArgs,
+      { where: { ...findAccountsInput, user } },
+      { transformClass: Account },
+    );
   }
 }

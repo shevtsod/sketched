@@ -4,7 +4,7 @@ import { EdgeType } from '../../common/graphql/pagination/edge.type';
 import { Account } from './entities/account.entity';
 
 @ObjectType()
-export class AccountsEdge extends EdgeType(Account) {}
+export class AccountEdge extends EdgeType(Account) {}
 
 @ObjectType()
-export class AccountsConnection extends ConnectionType(AccountsEdge) {}
+export class AccountConnection extends ConnectionType(AccountEdge) {}

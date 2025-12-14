@@ -9,4 +9,4 @@ in the table of contents below to read more about each topic.
 ## Table of Contents
 
 - Development
-  - [Database](./database.md)
+  - [Database](./development/database.md)

@@ -21,6 +21,8 @@ const EnvSchema = z
     BASE_PATH: z.string().default(''),
     /** Secret for hashing and signing keys, passwords, etc. */
     SECRET: z.string().default('change-me'),
+    /** Default admin username */
+    ADMIN_USERNAME: z.string().default('admin'),
     /** Default admin user email address */
     ADMIN_EMAIL: z.string().default('root@localhost'),
     /** Default admin user password */

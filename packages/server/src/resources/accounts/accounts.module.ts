@@ -7,6 +7,6 @@ import { AccountsService } from './accounts.service';
 @Module({
   imports: [DbModule, forwardRef(() => UsersModule)],
   providers: [AccountsService, AccountsResolver],
-  exports: [AccountsService, AccountsResolver],
+  exports: [AccountsService],
 })
 export class AccountsModule {}

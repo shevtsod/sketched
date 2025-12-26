@@ -1,24 +1,27 @@
 import { paginate } from '../../../common/graphql/pagination/pagination.util';
-import { mockAccount } from '../entities/__mocks__/account.entity.mock';
+import { createMockAccount } from '../entities/__mocks__/account.entity.mock';
 import { Account } from '../entities/account.entity';
 
-export function createMockAccountsService() {
-  const mocks = Array.from({ length: 10 }, mockAccount);
+export async function createMockAccountsService() {
+  const mocks = await Promise.all(
+    Array.from({ length: 10 }, createMockAccount),
+  );
 
   return {
-    create: vi.fn(() => mocks),
-    findOne: vi.fn(() => mocks[0]),
-    findMany: vi.fn(() => mocks),
-    paginate: vi.fn((paginationArgs) =>
+    create: vi.fn((_opts) => mocks),
+    findOne: vi.fn<(_opts) => Account | undefined>(() => mocks[0]),
+    findUnique: vi.fn<(_opts) => Account | undefined>(() => mocks[0]),
+    findMany: vi.fn((_opts) => mocks),
+    paginate: vi.fn((opts) =>
       paginate(
-        paginationArgs,
+        opts,
         (mock) => mock.id,
         () => [mocks, mocks.length],
         { transformClass: Account },
       ),
     ),
-    update: vi.fn(() => mocks),
-    delete: vi.fn(() => mocks),
-    count: vi.fn(() => mocks.length),
+    update: vi.fn((_opts) => mocks),
+    delete: vi.fn((_opts) => mocks),
+    count: vi.fn((_opts) => mocks.length),
   };
 }

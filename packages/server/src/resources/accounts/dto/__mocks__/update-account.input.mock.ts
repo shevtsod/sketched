@@ -1,9 +1,9 @@
-import { mockAccount } from '../../entities/__mocks__/account.entity.mock';
+import { createMockAccount } from '../../entities/__mocks__/account.entity.mock';
 import { UpdateAccountInput } from '../update-account.input';
 
-export function mockUpdateAccountInput(
+export async function createMockUpdateAccountInput(
   overrides?: Partial<UpdateAccountInput>,
-): UpdateAccountInput {
-  const { createdAt, updatedAt, ...account } = mockAccount();
+): Promise<UpdateAccountInput> {
+  const { createdAt, updatedAt, ...account } = await createMockAccount();
   return { ...account, ...overrides };
 }

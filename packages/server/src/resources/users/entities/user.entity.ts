@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
   IsDate,
@@ -14,17 +14,17 @@ import {
 export class User {
   @IsInt()
   @IsPositive()
-  @Field(() => ID, { description: 'Database ID (PK)' })
+  @Field(() => Int, { description: 'Database ID (PK)' })
   id: number;
+
+  @Length(1, 256)
+  @Field({ description: 'Display name' })
+  username: string;
 
   @Length(1, 256)
   @IsEmail()
   @Field({ description: 'Email address' })
   email: string;
-
-  @Length(1, 256)
-  @Field({ description: 'Display name' })
-  name: string;
 
   @IsOptional()
   @IsUrl()

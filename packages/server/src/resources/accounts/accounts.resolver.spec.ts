@@ -1,23 +1,22 @@
 import { Test } from '@nestjs/testing';
 import { Mocked } from 'vitest';
-import { mockPaginationArgs } from '../../common/graphql/pagination/__mocks__/pagination.args.mock';
 import { createMockUsersService } from '../users/__mocks__/users.service.mock';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { createMockAccountsService } from './__mocks__/accounts.service.mock';
 import { AccountsResolver } from './accounts.resolver';
 import { AccountsService } from './accounts.service';
-import { mockCreateAccountInput } from './dto/__mocks__/create-account.input.mock';
-import { mockFindAccountInput } from './dto/__mocks__/find-account.input.mock';
-import { mockFindAccountsInput } from './dto/__mocks__/find-accounts.input.mock';
-import { mockUpdateAccountInput } from './dto/__mocks__/update-account.input.mock';
-import { mockAccount } from './entities/__mocks__/account.entity.mock';
+import { createMockCreateAccountInput } from './dto/__mocks__/create-account.input.mock';
+import { createMockFindAccountInput } from './dto/__mocks__/find-account.input.mock';
+import { createMockFindAccountsInput } from './dto/__mocks__/find-accounts.input.mock';
+import { createMockUpdateAccountInput } from './dto/__mocks__/update-account.input.mock';
+import { createMockAccount } from './entities/__mocks__/account.entity.mock';
 import { Account } from './entities/account.entity';
 
-const mockAccountsService = createMockAccountsService();
-const mockUsersService = createMockUsersService();
-
 describe('AccountsResolver', () => {
+  const mockAccountsService = createMockAccountsService();
+  const mockUsersService = createMockUsersService();
+
   let resolver: AccountsResolver;
   let accountsService: Mocked<AccountsService>;
   let usersService: Mocked<UsersService>;
@@ -38,8 +37,8 @@ describe('AccountsResolver', () => {
     }).compile();
 
     resolver = module.get(AccountsResolver);
-    accountsService = module.get<Mocked<AccountsService>>(AccountsService);
-    usersService = module.get<Mocked<UsersService>>(UsersService);
+    accountsService = module.get(AccountsService);
+    usersService = module.get(UsersService);
   });
 
   it('should be defined', () => {
@@ -47,7 +46,7 @@ describe('AccountsResolver', () => {
   });
 
   it('should create an Account', async () => {
-    const input = mockCreateAccountInput();
+    const input = await createMockCreateAccountInput();
     const options = { data: input };
     const res = await resolver.createAccount(input);
     expect(accountsService.create).toHaveBeenCalledWith(options);
@@ -55,20 +54,20 @@ describe('AccountsResolver', () => {
   });
 
   it('should find one Account', async () => {
-    const input = mockFindAccountInput();
+    const input = await createMockFindAccountInput();
     const options = { where: input };
-    const res = await resolver.account(input);
-    expect(accountsService.findOne).toHaveBeenCalledWith(options);
+    const res = await resolver.account(input, {});
+    expect(accountsService.findUnique).toHaveBeenCalledWith(options);
     expect(res).toBeInstanceOf(Account);
   });
 
   it('should find many Accounts', async () => {
-    const paginationArgs = mockPaginationArgs();
-    const input = mockFindAccountsInput();
-    const options = { where: input };
-    const res = await resolver.accounts(paginationArgs, input);
+    const input = await createMockFindAccountsInput();
+    const { first, after, last, before, ...rest } = input;
+    const options = { where: rest };
+    const res = await resolver.accounts(input, {});
     expect(accountsService.paginate).toHaveBeenCalledWith(
-      paginationArgs,
+      { first, after, last, before },
       options,
       expect.anything(),
     );
@@ -79,7 +78,7 @@ describe('AccountsResolver', () => {
   });
 
   it('should update a Account', async () => {
-    const input = mockUpdateAccountInput();
+    const input = await createMockUpdateAccountInput();
     const { id, ...data } = input;
     const res = await resolver.updateAccount(input);
     expect(accountsService.update).toHaveBeenCalledWith({
@@ -90,7 +89,7 @@ describe('AccountsResolver', () => {
   });
 
   it('should delete a Account', async () => {
-    const input = mockFindAccountInput();
+    const input = await createMockFindAccountInput();
     const options = { where: input };
     const res = await resolver.deleteAccount(input);
     expect(accountsService.delete).toHaveBeenCalledWith(options);
@@ -98,9 +97,9 @@ describe('AccountsResolver', () => {
   });
 
   it('should find a User for an Account', async () => {
-    const account = mockAccount();
+    const account = await createMockAccount();
     const options = { where: { accounts: { some: { id: account.id } } } };
-    const res = await resolver.user(account);
+    const res = await resolver.user(account, {});
     expect(usersService.findOne).toHaveBeenCalledWith(options);
     expect(res).toBeInstanceOf(User);
   });

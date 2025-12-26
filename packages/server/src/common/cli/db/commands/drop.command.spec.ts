@@ -1,6 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { InquirerService } from 'nest-commander';
+import { getLoggerToken } from 'nestjs-pino';
 import { Mocked } from 'vitest';
+import { mockPinoLogger } from '../../../config/__mocks__/pino-logger.mock';
 import { mockDbManagementService } from '../../../db/__mocks__/db-management.service.mock';
 import { DbManagementService } from '../../../db/db-management.service';
 import { mockInquirerService } from '../../__mocks__/inquirer.service.mock';
@@ -16,6 +18,10 @@ describe('DropCommand', () => {
       providers: [
         DropCommand,
         {
+          provide: getLoggerToken(DropCommand.name),
+          useValue: mockPinoLogger,
+        },
+        {
           provide: DbManagementService,
           useValue: mockDbManagementService,
         },
@@ -27,8 +33,8 @@ describe('DropCommand', () => {
     }).compile();
 
     command = app.get(DropCommand);
-    dbMgmt = app.get<Mocked<DbManagementService>>(DbManagementService);
-    inquirerService = app.get<Mocked<InquirerService>>(InquirerService);
+    dbMgmt = app.get(DbManagementService);
+    inquirerService = app.get(InquirerService);
   });
 
   it('should be defined', () => {

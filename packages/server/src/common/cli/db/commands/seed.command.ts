@@ -1,5 +1,5 @@
-import { Logger } from '@nestjs/common';
 import { CommandRunner, SubCommand } from 'nest-commander';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { DbManagementService } from '../../../db/db-management.service';
 
 @SubCommand({
@@ -7,9 +7,11 @@ import { DbManagementService } from '../../../db/db-management.service';
   description: 'Seeds the database with random data',
 })
 export class SeedCommand extends CommandRunner {
-  private readonly logger = new Logger(SeedCommand.name);
-
-  constructor(private readonly dbMgmt: DbManagementService) {
+  constructor(
+    @InjectPinoLogger(SeedCommand.name)
+    private readonly logger: PinoLogger,
+    private readonly dbMgmt: DbManagementService,
+  ) {
     super();
   }
 

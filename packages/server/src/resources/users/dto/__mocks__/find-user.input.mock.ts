@@ -1,9 +1,9 @@
-import { mockUser } from '../../entities/__mocks__/user.entity.mock';
+import { createMockUser } from '../../entities/__mocks__/user.entity.mock';
 import { FindUserInput } from '../find-user.input';
 
-export function mockFindUserInput(
+export async function createMockFindUserInput(
   overrides?: Partial<FindUserInput>,
-): FindUserInput {
-  const { id } = mockUser();
+): Promise<FindUserInput> {
+  const { id } = await createMockUser();
   return { id, ...overrides };
 }

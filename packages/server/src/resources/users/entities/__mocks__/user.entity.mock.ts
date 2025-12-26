@@ -1,11 +1,11 @@
 import { faker } from '@faker-js/faker';
 import { User } from '../user.entity';
 
-export function mockUser(overrides?: Partial<User>): User {
+export async function createMockUser(overrides?: Partial<User>): Promise<User> {
   return {
     id: faker.number.int(),
+    username: faker.internet.username(),
     email: faker.internet.email(),
-    name: faker.internet.username(),
     image: faker.internet.url(),
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),

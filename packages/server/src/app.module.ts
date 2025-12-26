@@ -1,6 +1,9 @@
 import { DynamicModule, ForwardReference, Module, Type } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
+import { AuthModule } from './common/auth/auth.module';
+import { JwtGuard } from './common/auth/strategies/jwt/jwt.guard';
 import { CliModule } from './common/cli/cli.module';
 import { getEnv } from './common/config/env';
 import { createHttpLogger, createLogger } from './common/config/logger';
@@ -41,6 +44,8 @@ export class AppModule {
             logger: createLogger({ sync: cli }),
           }),
         }),
+        // Authentication
+        AuthModule,
         // GraphQL API
         // https://docs.nestjs.com/graphql/quick-start
         GraphQLModule,
@@ -48,6 +53,14 @@ export class AppModule {
         ResourcesModule,
         // Conditionally-imported modules
         ...dynamicImports,
+      ],
+      providers: [
+        // add JwtAuthGuard globally
+        // https://docs.nestjs.com/recipes/passport
+        {
+          provide: APP_GUARD,
+          useClass: JwtGuard,
+        },
       ],
     };
   }

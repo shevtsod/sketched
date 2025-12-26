@@ -1,19 +1,25 @@
 import { Test } from '@nestjs/testing';
 import { Mocked } from 'vitest';
+import { hash } from '../../common/crypto/argon2/argon2.util';
 import { createMockPrismaService } from '../../common/db/__mocks__/prisma.service.mock';
 import { PrismaService } from '../../common/db/prisma.service';
-import { mockPaginationArgs } from '../../common/graphql/pagination/__mocks__/pagination.args.mock';
+import { createMockPaginationArgs } from '../../common/graphql/pagination/__mocks__/pagination.args.mock';
 import { AccountsService } from './accounts.service';
-import { mockCreateAccountInput } from './dto/__mocks__/create-account.input.mock';
-import { mockFindAccountInput } from './dto/__mocks__/find-account.input.mock';
-import { mockFindAccountsInput } from './dto/__mocks__/find-accounts.input.mock';
-import { mockUpdateAccountInput } from './dto/__mocks__/update-account.input.mock';
-import { mockAccount } from './entities/__mocks__/account.entity.mock';
+import { createMockCreateAccountInput } from './dto/__mocks__/create-account.input.mock';
+import { createMockFindAccountInput } from './dto/__mocks__/find-account.input.mock';
+import { createMockFindAccountsInput } from './dto/__mocks__/find-accounts.input.mock';
+import { createMockUpdateAccountInput } from './dto/__mocks__/update-account.input.mock';
+import { createMockAccount } from './entities/__mocks__/account.entity.mock';
 import { Account } from './entities/account.entity';
 
-const mockPrismaService = createMockPrismaService('account', mockAccount);
+vi.mock('../../common/crypto/argon2/argon2.util', { spy: true });
 
-describe('AccountsService', () => {
+describe('AccountsService', async () => {
+  const mockPrismaService = await createMockPrismaService(
+    'account',
+    createMockAccount,
+  );
+
   let service: AccountsService;
   let prismaService: Mocked<PrismaService>;
 
@@ -29,7 +35,7 @@ describe('AccountsService', () => {
     }).compile();
 
     service = module.get(AccountsService);
-    prismaService = module.get<Mocked<PrismaService>>(PrismaService);
+    prismaService = module.get(PrismaService);
   });
 
   it('should be defined', () => {
@@ -37,23 +43,27 @@ describe('AccountsService', () => {
   });
 
   it('should create a Account', async () => {
-    const input = mockCreateAccountInput();
+    const input = await createMockCreateAccountInput();
+    const { password, ...inputRest } = input;
     const options = { data: input };
-    mockPrismaService.account?.createManyAndReturn.mockResolvedValueOnce([
-      input,
-    ] as Account[]);
+    mockPrismaService.account?.createManyAndReturn.mockImplementationOnce(
+      (input) => [input.data] as Account[],
+    );
     const res = await service.create(options);
     expect(prismaService.account.createManyAndReturn).toHaveBeenCalledWith(
       options,
     );
+    expect(hash).toHaveBeenCalledWith(password);
 
     for (const item of res) {
-      expect(item).toEqual(expect.objectContaining(input));
+      expect(item).toEqual(expect.objectContaining(inputRest));
+      expect(item.password).not.toEqual(password);
+      expect(item.password?.startsWith('$argon2id$')).is.true;
     }
   });
 
   it('should find one Account', async () => {
-    const input = mockFindAccountInput();
+    const input = await createMockFindAccountsInput();
     const options = { where: input };
     mockPrismaService.account?.findFirst.mockResolvedValueOnce(
       input as Account,
@@ -63,8 +73,19 @@ describe('AccountsService', () => {
     expect(res).toEqual(expect.objectContaining(input));
   });
 
+  it('should find unique Account', async () => {
+    const input = await createMockFindAccountInput();
+    const options = { where: input };
+    mockPrismaService.account?.findUnique.mockResolvedValueOnce(
+      input as Account,
+    );
+    const res = await service.findUnique(options);
+    expect(prismaService.account.findUnique).toHaveBeenCalledWith(options);
+    expect(res).toEqual(expect.objectContaining(input));
+  });
+
   it('should find many Accounts', async () => {
-    const input = mockFindAccountsInput();
+    const input = await createMockFindAccountsInput();
     const options = { where: input };
     mockPrismaService.account?.findMany.mockResolvedValueOnce([
       input,
@@ -79,9 +100,9 @@ describe('AccountsService', () => {
   });
 
   it('should paginate', async () => {
-    const input = mockFindAccountsInput();
+    const input = await createMockFindAccountsInput();
     const options = { where: input };
-    const paginationArgs = mockPaginationArgs();
+    const paginationArgs = await createMockPaginationArgs();
     mockPrismaService.account?.findMany.mockResolvedValueOnce([
       input,
     ] as Account[]);
@@ -117,24 +138,50 @@ describe('AccountsService', () => {
   });
 
   it('should update Accounts', async () => {
-    const findInput = mockFindAccountsInput();
-    const updateInput = mockUpdateAccountInput();
+    const findInput = await createMockFindAccountsInput();
+    const updateInput = await createMockUpdateAccountInput();
+    const { password, ...updateInputRest } = updateInput;
     const options = { where: findInput, data: updateInput };
-    mockPrismaService.account?.updateManyAndReturn.mockResolvedValueOnce([
-      findInput,
-    ] as Account[]);
+    mockPrismaService.account?.updateManyAndReturn.mockImplementation(
+      (input) => [input.data] as Account[],
+    );
     const res = await service.update(options);
     expect(mockPrismaService.account?.updateManyAndReturn).toHaveBeenCalledWith(
       options,
     );
+    expect(hash).toHaveBeenCalledWith(password);
 
     for (const item of res) {
-      expect(item).toEqual(expect.objectContaining(findInput));
+      expect(item).toEqual(expect.objectContaining(updateInputRest));
+      expect(item.password).not.toEqual(password);
+      expect(item.password?.startsWith('$argon2id$')).is.true;
     }
   });
 
+  it('should upsert Accounts', async () => {
+    const findInput = await createMockFindAccountInput();
+    const createInput = await createMockCreateAccountInput();
+    const { password: createPassword } = createInput;
+    const updateInput = await createMockUpdateAccountInput();
+    const { password: updatePassword } = updateInput;
+    const options = {
+      where: findInput,
+      create: createInput,
+      update: updateInput,
+    };
+    mockPrismaService.account?.upsert.mockResolvedValueOnce(
+      createInput as Account,
+    );
+    const res = await service.upsert(options);
+    expect(mockPrismaService.account?.upsert).toHaveBeenCalledWith(options);
+
+    expect(res).toEqual(expect.objectContaining(createInput));
+    expect(hash).toHaveBeenCalledWith(createPassword);
+    expect(hash).toHaveBeenCalledWith(updatePassword);
+  });
+
   it('should delete Accounts', async () => {
-    const input = mockFindAccountsInput();
+    const input = await createMockFindAccountsInput();
     const options = { where: input };
     mockPrismaService.account?.findMany.mockResolvedValueOnce([
       input,
@@ -149,7 +196,7 @@ describe('AccountsService', () => {
   });
 
   it('should count Accounts', async () => {
-    const input = mockFindAccountsInput();
+    const input = await createMockFindAccountsInput();
     const options = { where: input };
     const res = await service.count(options);
     mockPrismaService.account?.count.mockResolvedValueOnce(1);

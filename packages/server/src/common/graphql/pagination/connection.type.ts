@@ -1,7 +1,15 @@
 import { Type } from '@nestjs/common';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Edge } from './edge.type';
 import { PageInfo } from './page-info';
+
+/** Paginated API resource */
+export interface Edge<T> {
+  /** resource */
+  node: T;
+
+  /** cursor for this resource */
+  cursor: string;
+}
 
 /** Paginated resources and metadata */
 export interface Connection<T> {
@@ -20,10 +28,18 @@ export interface Connection<T> {
  *
  * @param EdgeClass class of edge
  * @returns class of connection
+ * @see {@link https://docs.nestjs.com/graphql/resolvers}
  */
-export function ConnectionType<T>(
-  EdgeClass: Type<Edge<T>>,
-): Type<Connection<T>> {
+export function ConnectionType<T>(EntityClass: Type<T>): Type<Connection<T>> {
+  @ObjectType(`${EntityClass.name}Edge`)
+  abstract class EdgeClass {
+    @Field()
+    cursor: string;
+
+    @Field(() => EntityClass)
+    node: T;
+  }
+
   @ObjectType({ isAbstract: true })
   abstract class ConnectionClass {
     @Field(() => [EdgeClass])

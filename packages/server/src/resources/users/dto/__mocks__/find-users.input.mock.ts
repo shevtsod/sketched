@@ -1,9 +1,11 @@
-import { mockUser } from '../../entities/__mocks__/user.entity.mock';
+import { createMockPaginationArgs } from '../../../../common/graphql/pagination/__mocks__/pagination.args.mock';
+import { createMockUser } from '../../entities/__mocks__/user.entity.mock';
 import { FindUsersInput } from '../find-users.input';
 
-export function mockFindUsersInput(
+export async function createMockFindUsersInput(
   overrides?: Partial<FindUsersInput>,
-): FindUsersInput {
-  const user = mockUser();
-  return { ...user, ...overrides };
+): Promise<FindUsersInput> {
+  const paginationArgs = createMockPaginationArgs();
+  const user = createMockUser();
+  return { ...paginationArgs, ...user, ...overrides };
 }

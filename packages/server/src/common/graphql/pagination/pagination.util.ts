@@ -1,7 +1,6 @@
 import { ClassConstructor, plainToInstance } from 'class-transformer';
-import { Connection } from './connection.type';
+import { Connection, Edge } from './connection.type';
 import { CursorType, decodeCursor, encodeCursor } from './cursor.util';
-import { Edge } from './edge.type';
 import { PageInfo } from './page-info';
 import { PaginationArgsError } from './pagination-args.error';
 import { PaginationArgs } from './pagination.args';

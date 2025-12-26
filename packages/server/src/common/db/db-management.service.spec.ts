@@ -1,6 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { execa } from 'execa';
+import { getLoggerToken } from 'nestjs-pino';
 import { Mocked } from 'vitest';
+import { mockPinoLogger } from '../config/__mocks__/pino-logger.mock';
 import { createMockPrismaService } from './__mocks__/prisma.service.mock';
 import { DbManagementService } from './db-management.service';
 import { PrismaService } from './prisma.service';
@@ -11,9 +13,9 @@ vi.mock('execa', () => ({
   })),
 }));
 
-const mockPrismaService = createMockPrismaService();
+describe('DbManagementService', async () => {
+  const mockPrismaService = await createMockPrismaService();
 
-describe('DbManagementService', () => {
   let service: DbManagementService;
   let prismaService: Mocked<PrismaService>;
 
@@ -22,6 +24,10 @@ describe('DbManagementService', () => {
       providers: [
         DbManagementService,
         {
+          provide: getLoggerToken(DbManagementService.name),
+          useValue: mockPinoLogger,
+        },
+        {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
@@ -29,7 +35,7 @@ describe('DbManagementService', () => {
     }).compile();
 
     service = app.get(DbManagementService);
-    prismaService = app.get<Mocked<PrismaService>>(PrismaService);
+    prismaService = app.get(PrismaService);
   });
 
   it('should be defined', () => {
@@ -48,7 +54,9 @@ describe('DbManagementService', () => {
 
   it('should reset the database', async () => {
     await service.reset();
-    expect(execa).toHaveBeenCalledWith(['npm run prisma migrate reset']);
+    expect(execa).toHaveBeenCalledWith([
+      'npm run -- prisma migrate reset --force',
+    ]);
   });
 
   it('should seed the database', async () => {

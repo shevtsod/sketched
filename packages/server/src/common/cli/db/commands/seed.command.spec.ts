@@ -1,5 +1,7 @@
 import { Test } from '@nestjs/testing';
+import { getLoggerToken } from 'nestjs-pino';
 import { Mocked } from 'vitest';
+import { mockPinoLogger } from '../../../config/__mocks__/pino-logger.mock';
 import { mockDbManagementService } from '../../../db/__mocks__/db-management.service.mock';
 import { DbManagementService } from '../../../db/db-management.service';
 import { SeedCommand } from './seed.command';
@@ -12,6 +14,11 @@ describe('SeedCommand', () => {
     const app = await Test.createTestingModule({
       providers: [
         SeedCommand,
+
+        {
+          provide: getLoggerToken(SeedCommand.name),
+          useValue: mockPinoLogger,
+        },
         {
           provide: DbManagementService,
           useValue: mockDbManagementService,
@@ -20,8 +27,7 @@ describe('SeedCommand', () => {
     }).compile();
 
     command = app.get(SeedCommand);
-    dbManagementService =
-      app.get<Mocked<DbManagementService>>(DbManagementService);
+    dbManagementService = app.get(DbManagementService);
   });
 
   it('should be defined', () => {

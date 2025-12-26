@@ -2,6 +2,133 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type User {
+  """Database ID (PK)"""
+  id: Int!
+
+  """Display name"""
+  username: String!
+
+  """Email address"""
+  email: String!
+
+  """Image URL"""
+  image: String
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """Update timestamp"""
+  updatedAt: DateTime
+  accounts(
+    first: Float
+    after: String
+    last: Float
+    before: String
+
+    """Database ID (PK)"""
+    id: Int
+
+    """User ID (FK)"""
+    userId: Int
+
+    """Account provider ID"""
+    providerId: String
+
+    """Account ID in provider"""
+    accountId: String
+
+    """Provider access token"""
+    accessToken: String
+
+    """Provider refresh token"""
+    refreshToken: String
+
+    """Provider access token expiration timestamp"""
+    accessTokenExpiresAt: DateTime
+
+    """Provider refresh token expiration timestamp"""
+    refreshTokenExpiresAt: DateTime
+
+    """Provider account access scopes"""
+    scope: String
+
+    """Provider ID token"""
+    idToken: String
+
+    """Account password (manual authentication)"""
+    password: String
+
+    """Creation timestamp"""
+    createdAt: DateTime
+
+    """Update timestamp"""
+    updatedAt: DateTime
+  ): AccountConnection!
+  sessions(
+    first: Float
+    after: String
+    last: Float
+    before: String
+
+    """Database ID (PK)"""
+    id: Int
+
+    """User ID (FK)"""
+    userId: Int
+
+    """Unique session token"""
+    token: String
+
+    """Session token expiry timestamp"""
+    expiresAt: DateTime
+
+    """Device IP address"""
+    ipAddress: String
+
+    """Device user agent information"""
+    userAgent: String
+
+    """Creation timestamp"""
+    createdAt: DateTime
+
+    """Update timestamp"""
+    updatedAt: DateTime
+  ): AccountConnection!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Session {
+  """Database ID (PK)"""
+  id: Int!
+
+  """User ID (FK)"""
+  userId: Int!
+
+  """Unique session token"""
+  token: String!
+
+  """Session token expiry timestamp"""
+  expiresAt: DateTime!
+
+  """Device IP address"""
+  ipAddress: String
+
+  """Device user agent information"""
+  userAgent: String
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """Update timestamp"""
+  updatedAt: DateTime
+  user: User!
+}
+
 type PageInfo {
   startCursor: String
   endCursor: String
@@ -9,12 +136,23 @@ type PageInfo {
   hasNextPage: Boolean!
 }
 
+type SessionEdge {
+  cursor: String!
+  node: Session!
+}
+
+type SessionConnection {
+  edges: [SessionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Float!
+}
+
 type Account {
   """Database ID (PK)"""
-  id: ID!
+  id: Int!
 
   """User ID (FK)"""
-  userId: Float!
+  userId: Int!
 
   """Account provider ID"""
   providerId: String!
@@ -51,11 +189,6 @@ type Account {
   user: User!
 }
 
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
 type AccountEdge {
   cursor: String!
   node: Account!
@@ -65,68 +198,6 @@ type AccountConnection {
   edges: [AccountEdge!]!
   pageInfo: PageInfo!
   totalCount: Float!
-}
-
-type User {
-  """Database ID (PK)"""
-  id: ID!
-
-  """Email address"""
-  email: String!
-
-  """Display name"""
-  name: String!
-
-  """Image URL"""
-  image: String
-
-  """Creation timestamp"""
-  createdAt: DateTime!
-
-  """Update timestamp"""
-  updatedAt: DateTime
-  accounts(first: Float, after: String, last: Float, before: String, findAccountsInput: FindAccountsInput): AccountConnection!
-}
-
-input FindAccountsInput {
-  """Database ID (PK)"""
-  id: ID
-
-  """User ID (FK)"""
-  userId: Float
-
-  """Account provider ID"""
-  providerId: String
-
-  """Account ID in provider"""
-  accountId: String
-
-  """Provider access token"""
-  accessToken: String
-
-  """Provider refresh token"""
-  refreshToken: String
-
-  """Provider access token expiration timestamp"""
-  accessTokenExpiresAt: DateTime
-
-  """Provider refresh token expiration timestamp"""
-  refreshTokenExpiresAt: DateTime
-
-  """Provider account access scopes"""
-  scope: String
-
-  """Provider ID token"""
-  idToken: String
-
-  """Account password (manual authentication)"""
-  password: String
-
-  """Creation timestamp"""
-  createdAt: DateTime
-
-  """Update timestamp"""
-  updatedAt: DateTime
 }
 
 type UserEdge {
@@ -141,139 +212,253 @@ type UserConnection {
 }
 
 type Query {
-  account(findAccountInput: FindAccountInput!): Account!
-  accounts(first: Float, after: String, last: Float, before: String, findAccountsInput: FindAccountsInput): AccountConnection!
-  user(findUserInput: FindUserInput!): User!
-  users(first: Float, after: String, last: Float, before: String, findUsersInput: FindUsersInput): UserConnection!
-}
+  account(
+    """Database ID (PK)"""
+    id: Int!
+  ): Account!
+  accounts(
+    first: Float
+    after: String
+    last: Float
+    before: String
 
-input FindAccountInput {
-  """Database ID (PK)"""
-  id: ID!
-}
+    """Database ID (PK)"""
+    id: Int
 
-input FindUserInput {
-  """Database ID (PK)"""
-  id: ID!
-}
+    """User ID (FK)"""
+    userId: Int
 
-input FindUsersInput {
-  """Database ID (PK)"""
-  id: ID
+    """Account provider ID"""
+    providerId: String
 
-  """Email address"""
-  email: String
+    """Account ID in provider"""
+    accountId: String
 
-  """Display name"""
-  name: String
+    """Provider access token"""
+    accessToken: String
 
-  """Image URL"""
-  image: String
+    """Provider refresh token"""
+    refreshToken: String
 
-  """Creation timestamp"""
-  createdAt: DateTime
+    """Provider access token expiration timestamp"""
+    accessTokenExpiresAt: DateTime
 
-  """Update timestamp"""
-  updatedAt: DateTime
+    """Provider refresh token expiration timestamp"""
+    refreshTokenExpiresAt: DateTime
+
+    """Provider account access scopes"""
+    scope: String
+
+    """Provider ID token"""
+    idToken: String
+
+    """Account password (manual authentication)"""
+    password: String
+
+    """Creation timestamp"""
+    createdAt: DateTime
+
+    """Update timestamp"""
+    updatedAt: DateTime
+  ): AccountConnection!
+  user(
+    """Database ID (PK)"""
+    id: Int!
+  ): User!
+  users(
+    first: Float
+    after: String
+    last: Float
+    before: String
+
+    """Database ID (PK)"""
+    id: Int
+
+    """Display name"""
+    username: String
+
+    """Email address"""
+    email: String
+
+    """Image URL"""
+    image: String
+
+    """Creation timestamp"""
+    createdAt: DateTime
+
+    """Update timestamp"""
+    updatedAt: DateTime
+  ): UserConnection!
+  session(
+    """Database ID (PK)"""
+    id: Int!
+  ): Session!
+  sessions(
+    first: Float
+    after: String
+    last: Float
+    before: String
+
+    """Database ID (PK)"""
+    id: Int
+
+    """User ID (FK)"""
+    userId: Int
+
+    """Unique session token"""
+    token: String
+
+    """Session token expiry timestamp"""
+    expiresAt: DateTime
+
+    """Device IP address"""
+    ipAddress: String
+
+    """Device user agent information"""
+    userAgent: String
+
+    """Creation timestamp"""
+    createdAt: DateTime
+
+    """Update timestamp"""
+    updatedAt: DateTime
+  ): SessionConnection!
 }
 
 type Mutation {
-  createAccount(createAccountInput: CreateAccountInput!): Account!
-  updateAccount(updateAccountInput: UpdateAccountInput!): Account!
-  deleteAccount(findAccountInput: FindAccountInput!): Account!
-  createUser(createUserInput: CreateUserInput!): User!
-  updateUser(updateUserInput: UpdateUserInput!): User!
-  deleteUser(findUserInput: FindUserInput!): User!
-}
+  createAccount(
+    """User ID (FK)"""
+    userId: Int!
 
-input CreateAccountInput {
-  """User ID (FK)"""
-  userId: Float!
+    """Account provider ID"""
+    providerId: String!
 
-  """Account provider ID"""
-  providerId: String!
+    """Account ID in provider"""
+    accountId: String!
 
-  """Account ID in provider"""
-  accountId: String!
+    """Provider access token"""
+    accessToken: String
 
-  """Provider access token"""
-  accessToken: String
+    """Provider refresh token"""
+    refreshToken: String
 
-  """Provider refresh token"""
-  refreshToken: String
+    """Provider access token expiration timestamp"""
+    accessTokenExpiresAt: DateTime
 
-  """Provider access token expiration timestamp"""
-  accessTokenExpiresAt: DateTime
+    """Provider refresh token expiration timestamp"""
+    refreshTokenExpiresAt: DateTime
 
-  """Provider refresh token expiration timestamp"""
-  refreshTokenExpiresAt: DateTime
+    """Provider account access scopes"""
+    scope: String
 
-  """Provider account access scopes"""
-  scope: String
+    """Provider ID token"""
+    idToken: String
 
-  """Provider ID token"""
-  idToken: String
+    """Account password (manual authentication)"""
+    password: String
+  ): Account!
+  updateAccount(
+    """Database ID (PK)"""
+    id: Int!
 
-  """Account password (manual authentication)"""
-  password: String
-}
+    """User ID (FK)"""
+    userId: Int!
 
-input UpdateAccountInput {
-  """Database ID (PK)"""
-  id: ID!
+    """Account provider ID"""
+    providerId: String!
 
-  """User ID (FK)"""
-  userId: Float!
+    """Account ID in provider"""
+    accountId: String!
 
-  """Account provider ID"""
-  providerId: String!
+    """Provider access token"""
+    accessToken: String
 
-  """Account ID in provider"""
-  accountId: String!
+    """Provider refresh token"""
+    refreshToken: String
 
-  """Provider access token"""
-  accessToken: String
+    """Provider access token expiration timestamp"""
+    accessTokenExpiresAt: DateTime
 
-  """Provider refresh token"""
-  refreshToken: String
+    """Provider refresh token expiration timestamp"""
+    refreshTokenExpiresAt: DateTime
 
-  """Provider access token expiration timestamp"""
-  accessTokenExpiresAt: DateTime
+    """Provider account access scopes"""
+    scope: String
 
-  """Provider refresh token expiration timestamp"""
-  refreshTokenExpiresAt: DateTime
+    """Provider ID token"""
+    idToken: String
 
-  """Provider account access scopes"""
-  scope: String
+    """Account password (manual authentication)"""
+    password: String
+  ): Account!
+  deleteAccount(
+    """Database ID (PK)"""
+    id: Int!
+  ): Account!
+  createUser(
+    """Display name"""
+    username: String!
 
-  """Provider ID token"""
-  idToken: String
+    """Email address"""
+    email: String!
 
-  """Account password (manual authentication)"""
-  password: String
-}
+    """Image URL"""
+    image: String
+  ): User!
+  updateUser(
+    """Database ID (PK)"""
+    id: Int!
 
-input CreateUserInput {
-  """Email address"""
-  email: String!
+    """Display name"""
+    username: String!
 
-  """Display name"""
-  name: String!
+    """Email address"""
+    email: String!
 
-  """Image URL"""
-  image: String
-}
+    """Image URL"""
+    image: String
+  ): User!
+  deleteUser(
+    """Database ID (PK)"""
+    id: Int!
+  ): User!
+  createSession(
+    """User ID (FK)"""
+    userId: Int!
 
-input UpdateUserInput {
-  """Database ID (PK)"""
-  id: ID!
+    """Unique session token"""
+    token: String!
 
-  """Email address"""
-  email: String!
+    """Session token expiry timestamp"""
+    expiresAt: DateTime!
 
-  """Display name"""
-  name: String!
+    """Device IP address"""
+    ipAddress: String
 
-  """Image URL"""
-  image: String
+    """Device user agent information"""
+    userAgent: String
+  ): Session!
+  updateSession(
+    """Database ID (PK)"""
+    id: Int!
+
+    """User ID (FK)"""
+    userId: Int!
+
+    """Unique session token"""
+    token: String!
+
+    """Session token expiry timestamp"""
+    expiresAt: DateTime!
+
+    """Device IP address"""
+    ipAddress: String
+
+    """Device user agent information"""
+    userAgent: String
+  ): Session!
+  deleteSession(
+    """Database ID (PK)"""
+    id: Int!
+  ): Session!
 }

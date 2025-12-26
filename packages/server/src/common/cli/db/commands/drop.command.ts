@@ -1,10 +1,10 @@
-import { Logger } from '@nestjs/common';
 import {
   CommandRunner,
   InquirerService,
   Option,
   SubCommand,
 } from 'nest-commander';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { DbManagementService } from '../../../db/db-management.service';
 
 @SubCommand({
@@ -12,9 +12,9 @@ import { DbManagementService } from '../../../db/db-management.service';
   description: 'Removes all existing data and tables',
 })
 export class DropCommand extends CommandRunner {
-  private readonly logger = new Logger(DropCommand.name);
-
   constructor(
+    @InjectPinoLogger(DropCommand.name)
+    private readonly logger: PinoLogger,
     private readonly dbMgmt: DbManagementService,
     private readonly inquirerService: InquirerService,
   ) {

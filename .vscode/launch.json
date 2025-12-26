@@ -2,7 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "(docker/server) attach",
+      "name": "(server) attach",
+      "type": "node",
+      "request": "attach",
+      "address": "localhost",
+      "port": 9229,
+      "restart": true,
+      "localRoot": "${workspaceFolder}/packages/server",
+    },
+    {
+      "name": "(server) attach in docker",
       "type": "node",
       "request": "attach",
       "address": "localhost",

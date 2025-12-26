@@ -1,9 +1,9 @@
 import { CreateUserInput } from '../create-user.input';
-import { mockUpdateUserInput } from './update-user.input.mock';
+import { createMockUpdateUserInput } from './update-user.input.mock';
 
-export function mockCreateUserInput(
+export async function createMockCreateUserInput(
   overrides?: Partial<CreateUserInput>,
-): CreateUserInput {
-  const { id, ...user } = mockUpdateUserInput();
+): Promise<CreateUserInput> {
+  const { id, ...user } = await createMockUpdateUserInput();
   return { ...user, ...overrides };
 }

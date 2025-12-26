@@ -1,27 +1,32 @@
 import { Test } from '@nestjs/testing';
 import { Mocked } from 'vitest';
-import { mockPaginationArgs } from '../../common/graphql/pagination/__mocks__/pagination.args.mock';
 import { createMockAccountsService } from '../accounts/__mocks__/accounts.service.mock';
 import { AccountsService } from '../accounts/accounts.service';
-import { mockFindAccountsInput } from '../accounts/dto/__mocks__/find-accounts.input.mock';
+import { createMockFindAccountsInput } from '../accounts/dto/__mocks__/find-accounts.input.mock';
 import { Account } from '../accounts/entities/account.entity';
+import { createMockSessionsService } from '../sessions/__mocks__/sessions.service.mock';
+import { createMockFindSessionsInput } from '../sessions/dto/__mocks__/find-sessions.input.mock';
+import { Session } from '../sessions/entities/session.entity';
+import { SessionsService } from '../sessions/sessions.service';
 import { createMockUsersService } from './__mocks__/users.service.mock';
-import { mockCreateUserInput } from './dto/__mocks__/create-user.input.mock';
-import { mockFindUserInput } from './dto/__mocks__/find-user.input.mock';
-import { mockFindUsersInput } from './dto/__mocks__/find-users.input.mock';
-import { mockUpdateUserInput } from './dto/__mocks__/update-user.input.mock';
-import { mockUser } from './entities/__mocks__/user.entity.mock';
+import { createMockCreateUserInput } from './dto/__mocks__/create-user.input.mock';
+import { createMockFindUserInput } from './dto/__mocks__/find-user.input.mock';
+import { createMockFindUsersInput } from './dto/__mocks__/find-users.input.mock';
+import { createMockUpdateUserInput } from './dto/__mocks__/update-user.input.mock';
+import { createMockUser } from './entities/__mocks__/user.entity.mock';
 import { User } from './entities/user.entity';
 import { UsersResolver } from './users.resolver';
 import { UsersService } from './users.service';
 
-const mockUsersService = createMockUsersService();
-const mockAccountsService = createMockAccountsService();
+describe('UsersResolver', async () => {
+  const mockUsersService = await createMockUsersService();
+  const mockAccountsService = await createMockAccountsService();
+  const mockSessionsService = await createMockSessionsService();
 
-describe('UsersResolver', () => {
   let resolver: UsersResolver;
   let usersService: Mocked<UsersService>;
   let accountsService: Mocked<AccountsService>;
+  let sessionsService: Mocked<SessionsService>;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -35,12 +40,17 @@ describe('UsersResolver', () => {
           provide: AccountsService,
           useValue: mockAccountsService,
         },
+        {
+          provide: SessionsService,
+          useValue: mockSessionsService,
+        },
       ],
     }).compile();
 
     resolver = module.get(UsersResolver);
-    usersService = module.get<Mocked<UsersService>>(UsersService);
-    accountsService = module.get<Mocked<AccountsService>>(AccountsService);
+    usersService = module.get(UsersService);
+    accountsService = module.get(AccountsService);
+    sessionsService = module.get(SessionsService);
   });
 
   it('should be defined', () => {
@@ -48,7 +58,7 @@ describe('UsersResolver', () => {
   });
 
   it('should create a User', async () => {
-    const input = mockCreateUserInput();
+    const input = await createMockCreateUserInput();
     const options = { data: input };
     const res = await resolver.createUser(input);
     expect(usersService.create).toHaveBeenCalledWith(options);
@@ -56,22 +66,22 @@ describe('UsersResolver', () => {
   });
 
   it('should find one User', async () => {
-    const input = mockFindUserInput();
+    const input = await createMockFindUserInput();
     const options = { where: input };
-    const res = await resolver.user(input);
-    expect(usersService.findOne).toHaveBeenCalledWith(options);
+    const res = await resolver.user(input, {});
+    expect(usersService.findUnique).toHaveBeenCalledWith(options);
     expect(res).toBeInstanceOf(User);
   });
 
   it('should find many Users', async () => {
-    const paginationArgs = mockPaginationArgs();
-    const input = mockFindUsersInput();
-    const options = { where: input };
-    const res = await resolver.users(paginationArgs, input);
+    const input = await createMockFindUsersInput();
+    const { first, after, last, before, ...rest } = input;
+    const options = { where: rest };
+    const res = await resolver.users(input, {});
     expect(usersService.paginate).toHaveBeenCalledWith(
-      paginationArgs,
+      { first, after, last, before },
       options,
-      expect.anything(),
+      expect.any(Object),
     );
 
     for (const { node } of res.edges) {
@@ -80,7 +90,7 @@ describe('UsersResolver', () => {
   });
 
   it('should update a User', async () => {
-    const input = mockUpdateUserInput();
+    const input = await createMockUpdateUserInput();
     const { id, ...data } = input;
     const res = await resolver.updateUser(input);
     expect(usersService.update).toHaveBeenCalledWith({
@@ -91,7 +101,7 @@ describe('UsersResolver', () => {
   });
 
   it('should delete a User', async () => {
-    const input = mockFindUserInput();
+    const input = await createMockFindUserInput();
     const options = { where: input };
     const res = await resolver.deleteUser(input);
     expect(usersService.delete).toHaveBeenCalledWith(options);
@@ -99,19 +109,36 @@ describe('UsersResolver', () => {
   });
 
   it('should find Accounts for a User', async () => {
-    const user = mockUser();
-    const paginationArgs = mockPaginationArgs();
-    const input = mockFindAccountsInput();
-    const options = { where: { ...input, user } };
-    const res = await resolver.accounts(user, paginationArgs, input);
+    const user = await createMockUser();
+    const input = await createMockFindAccountsInput();
+    const { first, after, last, before, ...rest } = input;
+    const options = { where: { ...rest, user } };
+    const res = await resolver.accounts(user, input, {});
     expect(accountsService.paginate).toHaveBeenCalledWith(
-      paginationArgs,
+      { first, after, last, before },
       options,
       expect.anything(),
     );
 
     for (const { node } of res.edges) {
       expect(node).toBeInstanceOf(Account);
+    }
+  });
+
+  it('should find Sessions for a User', async () => {
+    const user = await createMockUser();
+    const input = await createMockFindSessionsInput();
+    const { first, after, last, before, ...rest } = input;
+    const options = { where: { ...rest, user } };
+    const res = await resolver.sessions(user, input, {});
+    expect(sessionsService.paginate).toHaveBeenCalledWith(
+      { first, after, last, before },
+      options,
+      expect.anything(),
+    );
+
+    for (const { node } of res.edges) {
+      expect(node).toBeInstanceOf(Session);
     }
   });
 });

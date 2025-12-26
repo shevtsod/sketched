@@ -1,5 +1,5 @@
 import argon2 from 'argon2';
-import { env } from '../config/env';
+import { env } from '../../config/env';
 
 type Argon2Options = Omit<
   argon2.Options & {
@@ -29,10 +29,14 @@ const defaultSecret = Buffer.from(env.SECRET);
  */
 export async function hash(
   password: Buffer | string,
-  secret: Buffer<ArrayBufferLike> = defaultSecret,
+  secret?: Buffer<ArrayBufferLike>,
   options?: Argon2Options,
 ): Promise<string> {
-  return argon2.hash(password, { ...defaultOptions, ...options, secret });
+  return argon2.hash(password, {
+    ...defaultOptions,
+    ...options,
+    secret: secret || defaultSecret,
+  });
 }
 
 /**
@@ -46,7 +50,7 @@ export async function hash(
 export async function verify(
   digest: string,
   password: Buffer | string,
-  secret: Buffer<ArrayBufferLike> = defaultSecret,
+  secret?: Buffer<ArrayBufferLike>,
 ): Promise<boolean> {
-  return argon2.verify(digest, password, { secret });
+  return argon2.verify(digest, password, { secret: secret || defaultSecret });
 }

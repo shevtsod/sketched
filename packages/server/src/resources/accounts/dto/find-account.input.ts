@@ -1,5 +1,5 @@
-import { InputType, PickType } from '@nestjs/graphql';
+import { ArgsType, PickType } from '@nestjs/graphql';
 import { Account } from '../entities/account.entity';
 
-@InputType()
-export class FindAccountInput extends PickType(Account, ['id'], InputType) {}
+@ArgsType()
+export class FindAccountInput extends PickType(Account, ['id'], ArgsType) {}

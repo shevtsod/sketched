@@ -1,5 +1,5 @@
-import { Logger } from '@nestjs/common';
 import { CommandRunner, SubCommand } from 'nest-commander';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { DbManagementService } from '../../../db/db-management.service';
 
 @SubCommand({
@@ -7,9 +7,11 @@ import { DbManagementService } from '../../../db/db-management.service';
   description: 'Applies database migrations',
 })
 export class MigrateCommand extends CommandRunner {
-  private readonly logger = new Logger(MigrateCommand.name);
-
-  constructor(private readonly dbMgmt: DbManagementService) {
+  constructor(
+    @InjectPinoLogger(MigrateCommand.name)
+    private readonly logger: PinoLogger,
+    private readonly dbMgmt: DbManagementService,
+  ) {
     super();
   }
 

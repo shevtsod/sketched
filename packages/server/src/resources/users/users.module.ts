@@ -1,11 +1,16 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { DbModule } from '../../common/db/db.module';
 import { AccountsModule } from '../accounts/accounts.module';
+import { SessionsModule } from '../sessions/sessions.module';
 import { UsersResolver } from './users.resolver';
 import { UsersService } from './users.service';
 
 @Module({
-  imports: [DbModule, forwardRef(() => AccountsModule)],
+  imports: [
+    DbModule,
+    forwardRef(() => AccountsModule),
+    forwardRef(() => SessionsModule),
+  ],
   providers: [UsersResolver, UsersService],
   exports: [UsersService],
 })

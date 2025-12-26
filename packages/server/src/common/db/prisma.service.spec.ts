@@ -1,8 +1,11 @@
+import { faker } from '@faker-js/faker';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { getLoggerToken } from 'nestjs-pino';
 import { Mock, Mocked } from 'vitest';
 import { createMockConfigService } from '../config/__mocks__/config.service.mock.js';
+import { mockPinoLogger } from '../config/__mocks__/pino-logger.mock.js';
 import { EnvSchemaType } from '../config/env.js';
 import { PrismaClient } from './generated/prisma/client';
 import { PrismaService } from './prisma.service';
@@ -21,13 +24,13 @@ vi.mock('./generated/prisma/client', () => ({
   ),
 }));
 
-const mockEnv: Partial<EnvSchemaType> = {
-  DATABASE_URL: 'test',
-};
-
-const mockConfigService = createMockConfigService(mockEnv);
-
 describe('PrismaService', () => {
+  const mockEnv: Partial<EnvSchemaType> = {
+    DATABASE_URL: faker.internet.url(),
+  };
+
+  const mockConfigService = createMockConfigService(mockEnv);
+
   let service: PrismaService;
   let configService: Mocked<ConfigService>;
   let prismaPg: Mocked<PrismaPg>;
@@ -38,6 +41,10 @@ describe('PrismaService', () => {
       providers: [
         PrismaService,
         {
+          provide: getLoggerToken(PrismaService.name),
+          useValue: mockPinoLogger,
+        },
+        {
           provide: ConfigService,
           useValue: mockConfigService,
         },
@@ -45,7 +52,7 @@ describe('PrismaService', () => {
     }).compile();
 
     service = app.get(PrismaService);
-    configService = app.get<Mocked<ConfigService>>(ConfigService);
+    configService = app.get(ConfigService);
     prismaPg = (PrismaPg as Mock).mock.results[0].value;
     prismaClient = (PrismaClient as Mock).mock.results[0].value;
   });
@@ -72,7 +79,16 @@ describe('PrismaService', () => {
       }),
     );
 
-    expect(prismaClient.$on).toHaveBeenCalled();
+    expect(prismaClient.$on).toHaveBeenCalledWith(
+      'query',
+      expect.any(Function),
+    );
+    expect(prismaClient.$on).toHaveBeenCalledWith('info', expect.any(Function));
+    expect(prismaClient.$on).toHaveBeenCalledWith('warn', expect.any(Function));
+    expect(prismaClient.$on).toHaveBeenCalledWith(
+      'error',
+      expect.any(Function),
+    );
   });
 
   it('should connect', async () => {

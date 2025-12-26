@@ -1,9 +1,9 @@
 import { CreateAccountInput } from '../create-account.input';
-import { mockUpdateAccountInput } from './update-account.input.mock';
+import { createMockUpdateAccountInput } from './update-account.input.mock';
 
-export function mockCreateAccountInput(
+export async function createMockCreateAccountInput(
   overrides?: Partial<CreateAccountInput>,
-): CreateAccountInput {
-  const { id, ...account } = mockUpdateAccountInput();
+): Promise<CreateAccountInput> {
+  const { id, ...account } = await createMockUpdateAccountInput();
   return { ...account, ...overrides };
 }

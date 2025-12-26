@@ -22,13 +22,17 @@ export class UsersService {
     return this.prisma.user.findFirst(...args);
   }
 
+  findUnique(...args: Parameters<typeof this.prisma.user.findUnique>) {
+    return this.prisma.user.findUnique(...args);
+  }
+
   findMany(...args: Parameters<typeof this.prisma.user.findMany>) {
     return this.prisma.user.findMany(...args);
   }
 
   paginate(
     paginationArgs: PaginationArgs,
-    args: Pick<UserFindManyArgs, 'where' | 'include'>,
+    args: Pick<UserFindManyArgs, 'where' | 'select'>,
     paginateOptions?: PaginateOptions<User>,
   ): Promise<UserConnection> {
     const { where } = args;
@@ -53,6 +57,10 @@ export class UsersService {
 
   update(...args: Parameters<typeof this.prisma.user.updateManyAndReturn>) {
     return this.prisma.user.updateManyAndReturn(...args);
+  }
+
+  upsert(...args: Parameters<typeof this.prisma.user.upsert>) {
+    return this.prisma.user.upsert(...args);
   }
 
   async delete(...args: Parameters<typeof this.prisma.user.deleteMany>) {

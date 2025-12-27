@@ -84,9 +84,9 @@ export class AuthController {
     return token;
   }
 
-  @Get('userInfo')
-  userInfo(@Req() req: Request) {
-    return this.authService.userInfo(req.user as ExpressUser);
+  @Get('userinfo')
+  userinfo(@Req() req: Request) {
+    return this.authService.userinfo(req.user as ExpressUser);
   }
 
   private setCookies(res: Response, token: AccessToken) {

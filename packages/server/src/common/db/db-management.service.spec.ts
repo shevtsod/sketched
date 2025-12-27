@@ -49,7 +49,7 @@ describe('DbManagementService', async () => {
 
   it('should migrate the database', async () => {
     await service.migrate();
-    expect(execa).toHaveBeenCalledWith(['npm run prisma migrate']);
+    expect(execa).toHaveBeenCalledWith(['npm run prisma migrate deploy']);
   });
 
   it('should reset the database', async () => {

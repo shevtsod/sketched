@@ -30,7 +30,7 @@ export class DbManagementService {
   async migrate(): Promise<void> {
     this.logger.info(`Migrating database ...`);
 
-    const { stdout } = await execa`npm run prisma migrate`;
+    const { stdout } = await execa`npm run prisma migrate deploy`;
     this.logger.info(stdout);
 
     this.logger.info(`Finished migrating database`);

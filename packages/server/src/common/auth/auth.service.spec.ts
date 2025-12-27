@@ -314,7 +314,7 @@ describe('AuthService', async () => {
     const expressUser = createMockExpressUser();
     const user = await createMockUser();
     mockUsersService.findUnique.mockResolvedValueOnce(user);
-    const res = await service.userInfo(expressUser);
+    const res = await service.userinfo(expressUser);
     expect(usersService.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: expressUser.id },

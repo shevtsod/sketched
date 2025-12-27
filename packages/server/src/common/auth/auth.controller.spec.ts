@@ -171,8 +171,8 @@ describe('AuthController', async () => {
     const req = {
       user: expressUser,
     } as unknown as Request;
-    authService.userInfo.mockResolvedValue(user);
-    const res = await controller.userInfo(req);
+    authService.userinfo.mockResolvedValue(user);
+    const res = await controller.userinfo(req);
     expect(res).toBe(user);
   });
 });

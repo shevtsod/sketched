@@ -189,7 +189,7 @@ export class AuthService {
    * @param expressUser Express User
    * @returns User record
    */
-  async userInfo(expressUser: ExpressUser) {
+  async userinfo(expressUser: ExpressUser) {
     return this.findUser(expressUser);
   }
 

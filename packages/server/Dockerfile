@@ -52,7 +52,7 @@ COPY --from=build /app/packages/server ./packages/server
 EXPOSE 3000
 
 # Pre-run script
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["./packages/server/docker-entrypoint.sh"]
 
 # Start the app
 CMD ["npm", "run", "start:server"]

@@ -42,4 +42,4 @@ FROM caddy:2-alpine AS run
 COPY --from=build /app/packages/client/dist /usr/share/caddy
 
 # Copy Caddy configuration
-COPY Caddyfile /etc/caddy/Caddyfile
+COPY packages/client/Caddyfile /etc/caddy/Caddyfile

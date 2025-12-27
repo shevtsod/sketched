@@ -5,10 +5,13 @@ on:
   workflow_dispatch:
 
   push:
-    # Run when push any branch
-    branches: ['**']
+    # Run on push to main or master
+    branches: [ main, master ]
     # Run when push any tag
     tags: ['v*']
+  # Run on PR to main or master
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   # run tests in all workspaces
@@ -31,6 +34,21 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Install Playwright Browsers
+        run: npx run pw:install
+
+      - name: Run Playwright tests
+        run: npx run pw:test
+
+        # https://github.com/actions/upload-artifact
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
 
       # https://docs.codecov.com/docs/quick-start
       - name: Upload client test coverage reports to Codecov

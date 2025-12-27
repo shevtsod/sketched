@@ -30,10 +30,23 @@
     "test:server": "npm -w server run test:cov",
     "test:server:e2e": "npm -w server run test:e2e",
     "test": "conc -c auto 'npm:test:client' 'npm:test:server' 'npm:test:server:e2e'",
+    "pw": "playwright",
+    "pw:install": "playwright install --with-deps",
+    "pw:test": "playwright test",
+    "pw:ui": "playwright test --ui",
+    "pw:gen": "playwright codegen",
+    "pw:report": "playwright show-report",
     "cli": "npm -w server run cli:prod --",
     "cli:dev": "npm -w server run cli --"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "@playwright/test": "^1.57.0",
+    "@testcontainers/minio": "^11.10.0",
+    "@testcontainers/postgresql": "^11.10.0",
+    "@testcontainers/valkey": "^11.10.0",
+    "@types/node": "^25.0.3",
+    "concurrently": "^9.2.1",
+    "execa": "^9.6.1",
+    "testcontainers": "^11.10.0"
   }
 }

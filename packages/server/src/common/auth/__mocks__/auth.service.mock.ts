@@ -5,5 +5,5 @@ export const mockAuthService = {
   register: vi.fn(),
   login: vi.fn(),
   refresh: vi.fn(),
-  userInfo: vi.fn(),
+  userinfo: vi.fn(),
 };

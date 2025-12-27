@@ -14,31 +14,32 @@ WORKDIR /app
 
 # Copy NPM files
 COPY package*.json ./
+COPY packages/client/package*.json ./packages/client/
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy remaining files
-COPY . .
+COPY packages/client packages/client
 
 # STAGE 2 - development
 FROM base AS development
 
 EXPOSE 5173
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev:client"]
 
 # STAGE 3 - build
 FROM base AS build
 
 # Build app
-RUN npm run build
+RUN npm run build:client
 
 # STAGE 4 - run
 FROM caddy:2-alpine AS run
 
 # Copy files from build
-COPY --from=build /app/dist /usr/share/caddy
+COPY --from=build /app/packages/client/dist /usr/share/caddy
 
 # Copy Caddy configuration
 COPY Caddyfile /etc/caddy/Caddyfile

@@ -14,12 +14,13 @@ WORKDIR /app
 
 # Copy NPM files
 COPY package*.json ./
+COPY packages/server/package*.json packages/server/prisma ./packages/server/
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy remaining files
-COPY . .
+COPY packages/server packages/server
 
 # STAGE 2 - development
 FROM base AS development
@@ -27,15 +28,15 @@ FROM base AS development
 EXPOSE 3000 9229
 
 # Pre-run script
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["./packages/server/docker-entrypoint.sh"]
 
-CMD ["npm", "run", "start:debug"]
+CMD ["npm", "run", "dev:server"]
 
 # STAGE 3 - build
 FROM base AS build
 
 # Build app
-RUN npm run build
+RUN npm run build:server
 
 # STAGE 4 - run
 FROM node:24-alpine AS run
@@ -45,7 +46,7 @@ WORKDIR /app
 # Copy files from build
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
+COPY --from=build /app/packages/server ./packages/server
 
 # Expose app port
 EXPOSE 3000
@@ -54,4 +55,4 @@ EXPOSE 3000
 ENTRYPOINT ["./docker-entrypoint.sh"]
 
 # Start the app
-CMD ["node", "dist/main"]
+CMD ["npm", "run", "start:server"]

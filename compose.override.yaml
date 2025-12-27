@@ -7,7 +7,7 @@ services:
     # Build image from Dockerfile
     build:
       dockerfile: "packages/client/Dockerfile"
-      target: "development"
+      #target: "development"
     # Load environment variables from file
     env_file:
       - path: ".env"
@@ -25,7 +25,7 @@ services:
     # Build image from Dockerfile
     build:
       dockerfile: "packages/server/Dockerfile"
-      target: "development"
+      #target: "development"
     ports:
       - "3000:3000"
       # Node.js debugger

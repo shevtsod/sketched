@@ -90,9 +90,7 @@ describe('prisma-args.util', () => {
     });
 
     const res = resolveInfoToPrismaArgs(info);
-    expect(res).toEqual({
-      select: {},
-    });
+    expect(res).toEqual({});
   });
 
   it('skips relations', () => {
@@ -118,9 +116,7 @@ describe('prisma-args.util', () => {
     });
 
     const res = resolveInfoToPrismaArgs(info);
-    expect(res).toEqual({
-      select: {},
-    });
+    expect(res).toEqual({});
   });
 
   it('handles paginated records', () => {

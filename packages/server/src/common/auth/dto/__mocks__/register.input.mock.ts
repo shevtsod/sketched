@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { generate } from 'generate-password';
 import { createMockCreateUserInput } from '../../../../resources/users/dto/__mocks__/create-user.input.mock';
 import { RegisterInput } from '../register.input';
 
@@ -9,7 +9,12 @@ export async function createMockRegisterInput(
 
   return {
     ...createUserInput,
-    password: faker.internet.password(),
+    password: generate({
+      length: 16,
+      numbers: true,
+      symbols: true,
+      strict: true,
+    }),
     ...overrides,
   };
 }

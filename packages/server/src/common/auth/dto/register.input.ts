@@ -12,5 +12,5 @@ export class RegisterInput extends CreateUserInput {
     nullable: true,
     description: 'Account password (manual authentication)',
   })
-  password?: string | null;
+  password: string;
 }

@@ -1,6 +1,6 @@
-import { faker } from '@faker-js/faker';
 import { UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { generate } from 'generate-password';
 import { Mocked } from 'vitest';
 import { createMockAccount } from '../../../../resources/accounts/entities/__mocks__/account.entity.mock';
 import { createMockUser } from '../../../../resources/users/entities/__mocks__/user.entity.mock';
@@ -34,7 +34,12 @@ describe('LocalStrategy', () => {
 
   it('should return user when credentials are valid', async () => {
     const mockExpressUser = createMockExpressUser();
-    const password = faker.internet.password();
+    const password = generate({
+      length: 16,
+      numbers: true,
+      symbols: true,
+      strict: true,
+    });
     authService.validateLocal.mockResolvedValue(mockExpressUser);
     const res = await strategy.validate(mockExpressUser.username, password);
     expect(authService.validateLocal).toHaveBeenCalledWith(

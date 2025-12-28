@@ -102,7 +102,7 @@ describe('AccountsService', async () => {
   it('should paginate', async () => {
     const input = await createMockFindAccountsInput();
     const options = { where: input };
-    const paginationArgs = await createMockPaginationArgs();
+    const paginationArgs = createMockPaginationArgs();
     mockPrismaService.account?.findMany.mockResolvedValueOnce([
       input,
     ] as Account[]);

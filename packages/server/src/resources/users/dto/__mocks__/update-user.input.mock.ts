@@ -4,6 +4,6 @@ import { UpdateUserInput } from '../update-user.input';
 export async function createMockUpdateUserInput(
   overrides?: Partial<UpdateUserInput>,
 ): Promise<UpdateUserInput> {
-  const { createdAt, updatedAt, ...user } = await createMockUser();
+  const { image, createdAt, updatedAt, ...user } = await createMockUser();
   return { ...user, ...overrides };
 }

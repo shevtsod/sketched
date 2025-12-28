@@ -7,6 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { plainToInstance } from 'class-transformer';
+import { PaginationArgs } from '../../common/graphql/pagination/pagination.args';
 import { PrismaArgs } from '../../common/graphql/prisma-args/prisma-args.decorator';
 import type { PrismaArgsType } from '../../common/graphql/prisma-args/prisma-args.util';
 import { User } from '../users/entities/user.entity';
@@ -28,19 +29,23 @@ export class SessionsResolver {
 
   @Mutation(() => Session)
   async createSession(
-    @Args() createSessionInput: CreateSessionInput,
+    @Args('input') input: CreateSessionInput,
+    @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<Session> {
-    const res = await this.sesionsService.create({ data: createSessionInput });
+    const res = await this.sesionsService.create({
+      data: input,
+      ...prismaArgs,
+    });
     return plainToInstance(Session, res[0]);
   }
 
   @Query(() => Session)
   async session(
-    @Args() findSessionInput: FindSessionInput,
+    @Args('input') input: FindSessionInput,
     @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<Session | null> {
     const res = await this.sesionsService.findUnique({
-      where: findSessionInput,
+      where: input,
       ...prismaArgs,
     });
     return plainToInstance(Session, res);
@@ -48,12 +53,12 @@ export class SessionsResolver {
 
   @Query(() => SessionConnection)
   sessions(
-    @Args() findSessionsInput: FindSessionsInput,
+    @Args() paginationArgs: PaginationArgs,
+    @Args('input', { nullable: true }) input: FindSessionsInput,
     @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<SessionConnection> {
-    const { first, after, last, before, ...input } = findSessionsInput;
     return this.sesionsService.paginate(
-      { first, after, last, before },
+      paginationArgs,
       { where: input, ...prismaArgs },
       { transformClass: Session },
     );
@@ -61,21 +66,27 @@ export class SessionsResolver {
 
   @Mutation(() => Session)
   async updateSession(
-    @Args()
-    { id, ...updateSessionInput }: UpdateSessionInput,
+    @Args('input')
+    { id, ...input }: UpdateSessionInput,
+    @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<Session> {
     const res = await this.sesionsService.update({
       where: { id },
-      data: updateSessionInput,
+      data: input,
+      ...prismaArgs,
     });
     return plainToInstance(Session, res[0]);
   }
 
   @Mutation(() => Session)
   async deleteSession(
-    @Args() findSessionInput: FindSessionInput,
+    @Args('input') input: FindSessionInput,
+    @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<Session> {
-    const res = await this.sesionsService.delete({ where: findSessionInput });
+    const res = await this.sesionsService.delete({
+      where: input,
+      ...prismaArgs,
+    });
     return plainToInstance(Session, res[0]);
   }
 

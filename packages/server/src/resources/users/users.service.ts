@@ -64,8 +64,10 @@ export class UsersService {
   }
 
   async delete(...args: Parameters<typeof this.prisma.user.deleteMany>) {
+    const [input, ...rest] = args;
+    const { where } = input ?? {};
     const res = await this.findMany(...args);
-    await this.prisma.user.deleteMany(...args);
+    await this.prisma.user.deleteMany({ where }, ...rest);
     return res;
   }
 

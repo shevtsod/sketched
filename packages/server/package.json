@@ -72,6 +72,7 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "execa": "^9.6.1",
+    "generate-password": "^1.7.1",
     "graphql": "^16.12.0",
     "nest-commander": "^3.20.1",
     "nestjs-pino": "^4.5.0",

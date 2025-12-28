@@ -9,7 +9,7 @@ import { createMockConfigService } from '../config/__mocks__/config.service.mock
 import { EnvSchemaType } from '../config/env';
 import { mockAuthService } from './__mocks__/auth.service.mock';
 import {
-  createMockAccessToken,
+  createMockAuthToken,
   createMockExpressUser,
 } from './__mocks__/auth.type.mock';
 import { AuthController } from './auth.controller';
@@ -83,8 +83,8 @@ describe('AuthController', async () => {
     } as unknown as Response;
     const ipAddress = faker.internet.ip();
     const userAgent = faker.internet.userAgent();
-    const accessToken = createMockAccessToken();
-    authService.login.mockResolvedValue(accessToken);
+    const authToken = createMockAuthToken();
+    authService.login.mockResolvedValue(authToken);
 
     const response = await controller.login(req, res, ipAddress, userAgent);
     expect(authService.login).toHaveBeenCalledWith(req.user, {
@@ -93,7 +93,7 @@ describe('AuthController', async () => {
     });
     expect(res.cookie).toHaveBeenCalledWith(
       'access_token',
-      accessToken.access_token,
+      authToken.access_token,
       expect.objectContaining({
         httpOnly: true,
         secure: true,
@@ -104,7 +104,7 @@ describe('AuthController', async () => {
     );
     expect(res.cookie).toHaveBeenCalledWith(
       'refresh_token',
-      accessToken.refresh_token,
+      authToken.refresh_token,
       expect.objectContaining({
         httpOnly: true,
         secure: true,
@@ -113,7 +113,7 @@ describe('AuthController', async () => {
         maxAge: expect.any(Number),
       }),
     );
-    expect(response).toBe(accessToken);
+    expect(response).toBe(authToken);
   });
 
   it('should refresh', async () => {
@@ -127,14 +127,14 @@ describe('AuthController', async () => {
     } as unknown as Response;
     const ipAddress = faker.internet.ip();
     const userAgent = faker.internet.userAgent();
-    const accessToken = createMockAccessToken();
-    spyRefreshJwtFromRequest.mockReturnValueOnce(accessToken.refresh_token!);
-    authService.refresh.mockResolvedValue(accessToken);
+    const authToken = createMockAuthToken();
+    spyRefreshJwtFromRequest.mockReturnValueOnce(authToken.refresh_token!);
+    authService.refresh.mockResolvedValue(authToken);
 
     const response = await controller.refresh(req, res, ipAddress, userAgent);
     expect(authService.refresh).toHaveBeenCalledWith(
       req.user,
-      accessToken.refresh_token!,
+      authToken.refresh_token!,
       {
         ipAddress,
         userAgent,
@@ -142,7 +142,7 @@ describe('AuthController', async () => {
     );
     expect(res.cookie).toHaveBeenCalledWith(
       'access_token',
-      accessToken.access_token,
+      authToken.access_token,
       expect.objectContaining({
         httpOnly: true,
         secure: true,
@@ -153,7 +153,7 @@ describe('AuthController', async () => {
     );
     expect(res.cookie).toHaveBeenCalledWith(
       'refresh_token',
-      accessToken.refresh_token,
+      authToken.refresh_token,
       expect.objectContaining({
         httpOnly: true,
         secure: true,
@@ -162,7 +162,7 @@ describe('AuthController', async () => {
         maxAge: expect.any(Number),
       }),
     );
-    expect(response).toBe(accessToken);
+    expect(response).toBe(authToken);
   });
 
   it('should return user info', async () => {

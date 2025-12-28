@@ -16,18 +16,30 @@ export interface PrismaArgsType {
 export function resolveInfoToPrismaArgs(
   info: GraphQLResolveInfo,
 ): PrismaArgsType {
+  const res: PrismaArgsType = {};
   let root = info.fieldNodes[0];
 
   // is this record paginated?
-  for (const selection of root.selectionSet?.selections ?? []) {
-    if (selection.kind === Kind.FIELD && selection.name.value === 'edges') {
-      // find the node
-      for (const sub of selection.selectionSet?.selections ?? []) {
-        if (sub.kind === Kind.FIELD && sub.name.value === 'node') {
-          root = sub;
+  if (
+    root.selectionSet?.selections.some(
+      (s) =>
+        s.kind === Kind.FIELD &&
+        ['totalCount', 'pageInfo', 'edges'].includes(s.name.value),
+    )
+  ) {
+    for (const selection of root.selectionSet.selections) {
+      if (selection.kind === Kind.FIELD && selection.name.value === 'edges') {
+        // find the node
+        for (const sub of selection.selectionSet?.selections ?? []) {
+          if (sub.kind === Kind.FIELD && sub.name.value === 'node') {
+            root = sub;
+          }
         }
       }
     }
+
+    // no "node" selection means no args
+    if (root === info.fieldNodes[0]) return res;
   }
 
   const select: PrismaArgsType = {};
@@ -36,9 +48,11 @@ export function resolveInfoToPrismaArgs(
     handleSelection(selection, select);
   }
 
-  return {
-    select,
-  };
+  if (Object.keys(select).length) {
+    res['select'] = select;
+  }
+
+  return res;
 }
 
 /**

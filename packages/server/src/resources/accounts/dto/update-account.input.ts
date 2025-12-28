@@ -1,12 +1,20 @@
-import { ArgsType, Field, OmitType } from '@nestjs/graphql';
+import { Field, InputType, OmitType } from '@nestjs/graphql';
 import { IsOptional, IsString, IsStrongPassword } from 'class-validator';
 import { Account } from '../entities/account.entity';
 
-@ArgsType()
+@InputType()
 export class UpdateAccountInput extends OmitType(
   Account,
-  ['createdAt', 'updatedAt'],
-  ArgsType,
+  [
+    'accessToken',
+    'refreshToken',
+    'scope',
+    'idToken',
+    'password',
+    'createdAt',
+    'updatedAt',
+  ],
+  InputType,
 ) {
   @IsOptional()
   @IsString()

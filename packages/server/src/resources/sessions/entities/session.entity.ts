@@ -24,7 +24,7 @@ export class Session {
 
   @Exclude()
   @Length(1, 256)
-  @Field({ description: 'Unique session token' })
+  @Field({ nullable: true, description: 'Unique session token' })
   token: string;
 
   @IsDate()

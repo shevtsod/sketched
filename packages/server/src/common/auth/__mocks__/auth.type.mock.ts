@@ -1,11 +1,11 @@
 import { faker } from '@faker-js/faker';
-import { AccessToken, ExpressUser, JwtPayload } from '../auth.type';
+import { AuthToken, ExpressUser, JwtPayload } from '../auth.type';
 
 export function createMockExpressUser(
   overrides?: Partial<ExpressUser>,
 ): ExpressUser {
   return {
-    id: faker.number.int(),
+    id: faker.number.int({ min: 1, max: 2147483647 }),
     username: faker.internet.username(),
     email: faker.internet.email(),
     ...overrides,
@@ -22,9 +22,7 @@ export function createMockJwtPayload(
   };
 }
 
-export function createMockAccessToken(
-  overrides?: Partial<AccessToken>,
-): AccessToken {
+export function createMockAuthToken(overrides?: Partial<AuthToken>): AuthToken {
   return {
     access_token: faker.string.alphanumeric({ length: 10 }),
     token_type: faker.string.alphanumeric({ length: 10 }),

@@ -3,7 +3,7 @@ import { User } from '../user.entity';
 
 export async function createMockUser(overrides?: Partial<User>): Promise<User> {
   return {
-    id: faker.number.int(),
+    id: faker.number.int({ min: 1, max: 2147483647 }),
     username: faker.internet.username(),
     email: faker.internet.email(),
     image: faker.internet.url(),

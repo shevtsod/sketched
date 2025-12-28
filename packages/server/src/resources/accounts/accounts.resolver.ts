@@ -7,6 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { plainToInstance } from 'class-transformer';
+import { PaginationArgs } from '../../common/graphql/pagination/pagination.args';
 import { PrismaArgs } from '../../common/graphql/prisma-args/prisma-args.decorator';
 import { type PrismaArgsType } from '../../common/graphql/prisma-args/prisma-args.util';
 import { User } from '../users/entities/user.entity';
@@ -28,19 +29,23 @@ export class AccountsResolver {
 
   @Mutation(() => Account)
   async createAccount(
-    @Args() createAccountInput: CreateAccountInput,
+    @Args('input') input: CreateAccountInput,
+    @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<Account> {
-    const res = await this.accountsService.create({ data: createAccountInput });
+    const res = await this.accountsService.create({
+      data: input,
+      ...prismaArgs,
+    });
     return plainToInstance(Account, res[0]);
   }
 
   @Query(() => Account)
   async account(
-    @Args() findAccountInput: FindAccountInput,
+    @Args('input') input: FindAccountInput,
     @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<Account | null> {
     const res = await this.accountsService.findUnique({
-      where: findAccountInput,
+      where: input,
       ...prismaArgs,
     });
     return plainToInstance(Account, res);
@@ -48,12 +53,12 @@ export class AccountsResolver {
 
   @Query(() => AccountConnection)
   accounts(
-    @Args() findAccountsInput: FindAccountsInput,
+    @Args() paginationArgs: PaginationArgs,
+    @Args('input', { nullable: true }) input: FindAccountsInput,
     @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<AccountConnection> {
-    const { first, after, last, before, ...input } = findAccountsInput;
     return this.accountsService.paginate(
-      { first, after, last, before },
+      paginationArgs,
       { where: input, ...prismaArgs },
       { transformClass: Account },
     );
@@ -61,21 +66,27 @@ export class AccountsResolver {
 
   @Mutation(() => Account)
   async updateAccount(
-    @Args()
-    { id, ...updateAccountInput }: UpdateAccountInput,
+    @Args('input')
+    { id, ...input }: UpdateAccountInput,
+    @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<Account> {
     const res = await this.accountsService.update({
       where: { id },
-      data: updateAccountInput,
+      data: input,
+      ...prismaArgs,
     });
     return plainToInstance(Account, res[0]);
   }
 
   @Mutation(() => Account)
   async deleteAccount(
-    @Args() findAccountInput: FindAccountInput,
+    @Args('input') input: FindAccountInput,
+    @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<Account> {
-    const res = await this.accountsService.delete({ where: findAccountInput });
+    const res = await this.accountsService.delete({
+      where: input,
+      ...prismaArgs,
+    });
     return plainToInstance(Account, res[0]);
   }
 

@@ -7,7 +7,7 @@ import { SessionsService } from '../../resources/sessions/sessions.service';
 import { User } from '../../resources/users/entities/user.entity';
 import { UsersService } from '../../resources/users/users.service';
 import { verify } from '../crypto/argon2/argon2.util';
-import { AccessToken, ExpressUser, JwtPayload } from './auth.type';
+import { AuthToken, ExpressUser, JwtPayload } from './auth.type';
 import { RegisterInput } from './dto/register.input';
 import { JWT_EXPIRES_IN, jwtSignOptions } from './strategies/jwt/jwt.strategy';
 import {
@@ -121,17 +121,17 @@ export class AuthService {
       ipAddress?: string;
       userAgent?: string;
     } = {},
-  ): Promise<AccessToken> {
+  ): Promise<AuthToken> {
     const { ipAddress, userAgent } = opts;
 
-    const accessToken = await this.signAccessToken(expressUser);
+    const authToken = await this.signAuthToken(expressUser);
 
     // Persist the refresh token in a session
-    if (accessToken.refresh_token) {
+    if (authToken.refresh_token) {
       await this.sessionsService.create({
         data: {
           userId: expressUser.id,
-          token: accessToken.refresh_token,
+          token: authToken.refresh_token,
           expiresAt: new Date(Date.now() + REFRESH_JWT_EXPIRES_IN * 1000),
           ipAddress,
           userAgent,
@@ -139,7 +139,7 @@ export class AuthService {
       });
     }
 
-    return accessToken;
+    return authToken;
   }
 
   /**
@@ -157,22 +157,22 @@ export class AuthService {
       ipAddress?: string;
       userAgent?: string;
     } = {},
-  ): Promise<AccessToken | null> {
+  ): Promise<AuthToken | null> {
     const { ipAddress, userAgent } = opts;
 
     // Find an existing session
     const session = await this.findSession(refreshToken);
     if (!session) return null;
 
-    const accessToken = await this.signAccessToken(expressUser);
+    const authToken = await this.signAuthToken(expressUser);
 
     // Persist the refresh token in a session
-    if (accessToken.refresh_token) {
+    if (authToken.refresh_token) {
       await this.sessionsService.update({
         where: { id: session.id },
         data: {
           userId: expressUser.id,
-          token: accessToken.refresh_token,
+          token: authToken.refresh_token,
           expiresAt: new Date(Date.now() + REFRESH_JWT_EXPIRES_IN * 1000),
           ipAddress,
           userAgent,
@@ -180,7 +180,7 @@ export class AuthService {
       });
     }
 
-    return accessToken;
+    return authToken;
   }
 
   /**
@@ -220,9 +220,7 @@ export class AuthService {
    * @param expressUser Express user to sign a token for
    * @returns authentication token
    */
-  private async signAccessToken(
-    expressUser: ExpressUser,
-  ): Promise<AccessToken> {
+  private async signAuthToken(expressUser: ExpressUser): Promise<AuthToken> {
     return {
       access_token: await this.signLoginJwt(expressUser),
       refresh_token: await this.signRefreshJwt(expressUser),

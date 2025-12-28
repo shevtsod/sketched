@@ -102,7 +102,7 @@ describe('SessionsService', async () => {
   it('should paginate', async () => {
     const input = await createMockFindSessionsInput();
     const options = { where: input };
-    const paginationArgs = await createMockPaginationArgs();
+    const paginationArgs = createMockPaginationArgs();
     mockPrismaService.session?.findMany.mockResolvedValueOnce([
       input,
     ] as Session[]);

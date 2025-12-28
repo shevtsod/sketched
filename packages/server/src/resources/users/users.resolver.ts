@@ -7,6 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { plainToInstance } from 'class-transformer';
+import { PaginationArgs } from '../../common/graphql/pagination/pagination.args';
 import { PrismaArgs } from '../../common/graphql/prisma-args/prisma-args.decorator';
 import { type PrismaArgsType } from '../../common/graphql/prisma-args/prisma-args.util';
 import { AccountConnection } from '../accounts/accounts.connection';
@@ -34,18 +35,24 @@ export class UsersResolver {
   ) {}
 
   @Mutation(() => User)
-  async createUser(@Args() createUserInput: CreateUserInput): Promise<User> {
-    const res = await this.usersService.create({ data: createUserInput });
+  async createUser(
+    @Args('input') input: CreateUserInput,
+    @PrismaArgs() prismaArgs: PrismaArgsType,
+  ): Promise<User> {
+    const res = await this.usersService.create({
+      data: input,
+      ...prismaArgs,
+    });
     return plainToInstance(User, res[0]);
   }
 
   @Query(() => User)
   async user(
-    @Args() findUserInput: FindUserInput,
+    @Args('input') input: FindUserInput,
     @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<User | null> {
     const res = this.usersService.findUnique({
-      where: findUserInput,
+      where: input,
       ...prismaArgs,
     });
     return plainToInstance(User, res);
@@ -53,12 +60,12 @@ export class UsersResolver {
 
   @Query(() => UserConnection)
   users(
-    @Args() findUsersInput: FindUsersInput,
+    @Args() paginationArgs: PaginationArgs,
+    @Args('input', { nullable: true }) input: FindUsersInput,
     @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<UserConnection> {
-    const { first, after, last, before, ...input } = findUsersInput;
     return this.usersService.paginate(
-      { first, after, last, before },
+      paginationArgs,
       { where: input, ...prismaArgs },
       { transformClass: User },
     );
@@ -66,44 +73,52 @@ export class UsersResolver {
 
   @Mutation(() => User)
   async updateUser(
-    @Args() { id, ...updateUserInput }: UpdateUserInput,
+    @Args('input') { id, ...input }: UpdateUserInput,
+    @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<User> {
-    const res = this.usersService.update({
+    const res = await this.usersService.update({
       where: { id },
-      data: updateUserInput,
+      data: input,
+      ...prismaArgs,
     });
     return plainToInstance(User, res[0]);
   }
 
   @Mutation(() => User)
-  async deleteUser(@Args() findUserInput: FindUserInput): Promise<User> {
-    const res = await this.usersService.delete({ where: findUserInput });
+  async deleteUser(
+    @Args('input') input: FindUserInput,
+    @PrismaArgs() prismaArgs: PrismaArgsType,
+  ): Promise<User> {
+    const res = await this.usersService.delete({
+      where: input,
+      ...prismaArgs,
+    });
     return plainToInstance(User, res[0]);
   }
 
   @ResolveField(() => AccountConnection)
   accounts(
     @Parent() user: User,
-    @Args() findAccountsInput: FindAccountsInput,
+    @Args() paginationArgs: PaginationArgs,
+    @Args('input', { nullable: true }) input: FindAccountsInput,
     @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<AccountConnection> {
-    const { first, after, last, before, ...input } = findAccountsInput;
     return this.accountsService.paginate(
-      { first, after, last, before },
+      paginationArgs,
       { where: { ...input, user }, ...prismaArgs },
       { transformClass: Account },
     );
   }
 
-  @ResolveField(() => AccountConnection)
+  @ResolveField(() => SessionConnection)
   sessions(
     @Parent() user: User,
-    @Args() findSessionsInput: FindSessionsInput,
+    @Args() paginationArgs: PaginationArgs,
+    @Args('input', { nullable: true }) input: FindSessionsInput,
     @PrismaArgs() prismaArgs: PrismaArgsType,
   ): Promise<SessionConnection> {
-    const { first, after, last, before, ...input } = findSessionsInput;
     return this.sessionsService.paginate(
-      { first, after, last, before },
+      paginationArgs,
       { where: { ...input, user }, ...prismaArgs },
       { transformClass: Session },
     );

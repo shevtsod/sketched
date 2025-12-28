@@ -1,12 +1,12 @@
-import { ArgsType, Field, OmitType } from '@nestjs/graphql';
+import { Field, InputType, OmitType } from '@nestjs/graphql';
 import { IsString, Length } from 'class-validator';
 import { Session } from '../entities/session.entity';
 
-@ArgsType()
+@InputType()
 export class UpdateSessionInput extends OmitType(
   Session,
-  ['createdAt', 'updatedAt'],
-  ArgsType,
+  ['token', 'createdAt', 'updatedAt'],
+  InputType,
 ) {
   @Length(1, 256)
   @IsString()

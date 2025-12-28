@@ -1,5 +1,5 @@
-import { faker } from '@faker-js/faker';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { generate } from 'generate-password';
 import { env } from '../src/common/config/env';
 import { createLogger } from '../src/common/config/logger';
 import { hash } from '../src/common/crypto/argon2/argon2.util';
@@ -71,7 +71,14 @@ async function main() {
       userId: id,
       accountId: `${id}`,
       providerId: Provider.Local,
-      password: await hash(faker.internet.password()),
+      password: await hash(
+        generate({
+          length: 16,
+          numbers: true,
+          symbols: true,
+          strict: true,
+        }),
+      ),
     };
 
     await prisma.account.upsert({

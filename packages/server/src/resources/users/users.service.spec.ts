@@ -89,7 +89,7 @@ describe('UsersService', async () => {
   it('should paginate', async () => {
     const input = await createMockFindUsersInput();
     const options = { where: input };
-    const paginationArgs = await createMockPaginationArgs();
+    const paginationArgs = createMockPaginationArgs();
     mockPrismaService.user?.findMany.mockResolvedValueOnce([input] as User[]);
     mockPrismaService.user?.count.mockResolvedValueOnce(1);
     const res = await service.paginate(paginationArgs, options);

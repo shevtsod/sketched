@@ -107,8 +107,10 @@ export class SessionsService {
   }
 
   async delete(...args: Parameters<typeof this.prisma.session.deleteMany>) {
+    const [input, ...rest] = args;
+    const { where } = input ?? {};
     const res = await this.findMany(...args);
-    await this.prisma.session.deleteMany(...args);
+    await this.prisma.session.deleteMany({ where }, ...rest);
     return res;
   }
 

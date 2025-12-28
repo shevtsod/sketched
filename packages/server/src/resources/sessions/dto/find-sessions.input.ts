@@ -1,10 +1,5 @@
-import { ArgsType, IntersectionType, PartialType } from '@nestjs/graphql';
-import { PaginationArgs } from '../../../common/graphql/pagination/pagination.args';
+import { InputType, PartialType } from '@nestjs/graphql';
 import { Session } from '../entities/session.entity';
 
-@ArgsType()
-export class FindSessionsInput extends IntersectionType(
-  PaginationArgs,
-  PartialType(Session),
-  ArgsType,
-) {}
+@InputType()
+export class FindSessionsInput extends PartialType(Session, InputType) {}

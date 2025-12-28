@@ -1,9 +1,9 @@
-import { ArgsType, OmitType } from '@nestjs/graphql';
+import { InputType, OmitType } from '@nestjs/graphql';
 import { UpdateUserInput } from './update-user.input';
 
-@ArgsType()
+@InputType()
 export class CreateUserInput extends OmitType(
   UpdateUserInput,
   ['id'],
-  ArgsType,
+  InputType,
 ) {}

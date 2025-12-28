@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { Mocked } from 'vitest';
+import { createMockPaginationArgs } from '../../common/graphql/pagination/__mocks__/pagination.args.mock';
 import { createMockUsersService } from '../users/__mocks__/users.service.mock';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
@@ -48,7 +49,7 @@ describe('AccountsResolver', () => {
   it('should create an Account', async () => {
     const input = await createMockCreateAccountInput();
     const options = { data: input };
-    const res = await resolver.createAccount(input);
+    const res = await resolver.createAccount(input, {});
     expect(accountsService.create).toHaveBeenCalledWith(options);
     expect(res).toBeInstanceOf(Account);
   });
@@ -62,12 +63,12 @@ describe('AccountsResolver', () => {
   });
 
   it('should find many Accounts', async () => {
+    const paginationArgs = createMockPaginationArgs();
     const input = await createMockFindAccountsInput();
-    const { first, after, last, before, ...rest } = input;
-    const options = { where: rest };
-    const res = await resolver.accounts(input, {});
+    const options = { where: input };
+    const res = await resolver.accounts(paginationArgs, input, {});
     expect(accountsService.paginate).toHaveBeenCalledWith(
-      { first, after, last, before },
+      paginationArgs,
       options,
       expect.anything(),
     );
@@ -80,7 +81,7 @@ describe('AccountsResolver', () => {
   it('should update a Account', async () => {
     const input = await createMockUpdateAccountInput();
     const { id, ...data } = input;
-    const res = await resolver.updateAccount(input);
+    const res = await resolver.updateAccount(input, {});
     expect(accountsService.update).toHaveBeenCalledWith({
       where: { id },
       data,
@@ -91,7 +92,7 @@ describe('AccountsResolver', () => {
   it('should delete a Account', async () => {
     const input = await createMockFindAccountInput();
     const options = { where: input };
-    const res = await resolver.deleteAccount(input);
+    const res = await resolver.deleteAccount(input, {});
     expect(accountsService.delete).toHaveBeenCalledWith(options);
     expect(res).toBeInstanceOf(Account);
   });

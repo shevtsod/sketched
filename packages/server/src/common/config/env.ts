@@ -64,13 +64,15 @@ const EnvSchema = z
   // Set computed values
   .transform((val) => ({
     ...val,
+
     // Set a default log level based on NODE_ENV
     LOG_LEVEL:
-      val.LOG_LEVEL !== undefined
-        ? val.LOG_LEVEL
-        : ['development', 'test'].includes(val.NODE_ENV)
-          ? 'debug'
-          : 'info',
+      val.LOG_LEVEL ??
+      (val.NODE_ENV === 'development'
+        ? 'debug'
+        : val.NODE_ENV === 'test'
+          ? 'warn'
+          : 'info'),
 
     /** True if environment in ["development", "test"] */
     isDevOrTest: ['development', 'test'].includes(val.NODE_ENV),

@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { Mocked } from 'vitest';
+import { createMockPaginationArgs } from '../../common/graphql/pagination/__mocks__/pagination.args.mock';
 import { createMockUsersService } from '../users/__mocks__/users.service.mock';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
@@ -48,7 +49,7 @@ describe('SessionsResolver', () => {
   it('should create a Session', async () => {
     const input = await createMockCreateSessionInput();
     const options = { data: input };
-    const res = await resolver.createSession(input);
+    const res = await resolver.createSession(input, {});
     expect(sessionsService.create).toHaveBeenCalledWith(options);
     expect(res).toBeInstanceOf(Session);
   });
@@ -62,14 +63,14 @@ describe('SessionsResolver', () => {
   });
 
   it('should find many Sessions', async () => {
+    const paginationArgs = createMockPaginationArgs();
     const input = await createMockFindSessionsInput();
-    const { first, after, last, before, ...rest } = input;
-    const options = { where: rest };
-    const res = await resolver.sessions(input, {});
+    const options = { where: input };
+    const res = await resolver.sessions(paginationArgs, input, {});
     expect(sessionsService.paginate).toHaveBeenCalledWith(
-      { first, after, last, before },
+      paginationArgs,
       options,
-      expect.anything(),
+      expect.any(Object),
     );
 
     for (const { node } of res.edges) {
@@ -80,7 +81,7 @@ describe('SessionsResolver', () => {
   it('should update a Session', async () => {
     const input = await createMockUpdateSessionInput();
     const { id, ...data } = input;
-    const res = await resolver.updateSession(input);
+    const res = await resolver.updateSession(input, {});
     expect(sessionsService.update).toHaveBeenCalledWith({
       where: { id },
       data,
@@ -91,7 +92,7 @@ describe('SessionsResolver', () => {
   it('should delete a Session', async () => {
     const input = await createMockFindSessionInput();
     const options = { where: input };
-    const res = await resolver.deleteSession(input);
+    const res = await resolver.deleteSession(input, {});
     expect(sessionsService.delete).toHaveBeenCalledWith(options);
     expect(res).toBeInstanceOf(Session);
   });

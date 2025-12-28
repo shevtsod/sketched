@@ -14,7 +14,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { AccessToken, ExpressUser } from './auth.type';
+import { AuthToken, ExpressUser } from './auth.type';
 import { RegisterInput } from './dto/register.input';
 import { JWT_EXPIRES_IN } from './strategies/jwt/jwt.strategy';
 import { LocalGuard } from './strategies/local/local.guard';
@@ -89,7 +89,7 @@ export class AuthController {
     return this.authService.userinfo(req.user as ExpressUser);
   }
 
-  private setCookies(res: Response, token: AccessToken) {
+  private setCookies(res: Response, token: AuthToken) {
     res.cookie('access_token', token.access_token, {
       httpOnly: true,
       secure: true,

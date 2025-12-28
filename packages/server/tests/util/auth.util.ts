@@ -1,36 +1,40 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AccessToken } from '../../src/common/auth/auth.type';
+import { AuthToken } from '../../src/common/auth/auth.type';
 import { env } from '../../src/common/config/env';
 
 // cached token
-let cachedToken: AccessToken | undefined;
+let cachedToken: AuthToken | undefined;
 let cachedTokenExpiresAt: Date | undefined;
 
-export async function getToken(app: INestApplication<App>) {
+export async function getAuthToken(app: INestApplication<App>) {
   if (
     cachedToken &&
-    (cachedTokenExpiresAt === undefined || cachedTokenExpiresAt > new Date())
+    (cachedTokenExpiresAt === undefined ||
+      cachedTokenExpiresAt > new Date(Date.now() + 1000))
   ) {
     return cachedToken;
   }
 
-  const res = await request(app.getHttpServer()).post('/auth/login').send({
-    username: env.ADMIN_USERNAME,
-    password: env.ADMIN_PASSWORD,
-  });
+  const res = await request(app.getHttpServer())
+    .post('/v1/auth/login')
+    .send({
+      username: env.ADMIN_USERNAME,
+      password: env.ADMIN_PASSWORD,
+    })
+    .expect(201);
 
   if (!res.body?.access_token) {
     throw new Error('Failed to get access token');
   }
 
-  const accessToken: AccessToken = res.body;
+  const authToken: AuthToken = res.body;
 
-  cachedToken = accessToken;
+  cachedToken = authToken;
 
-  if (accessToken.expires_in) {
-    cachedTokenExpiresAt = new Date(Date.now() + accessToken.expires_in);
+  if (authToken.expires_in) {
+    cachedTokenExpiresAt = new Date(Date.now() + authToken.expires_in);
   } else {
     cachedTokenExpiresAt = undefined;
   }
@@ -39,6 +43,6 @@ export async function getToken(app: INestApplication<App>) {
 }
 
 export async function getAccessToken(app: INestApplication<App>) {
-  const token = await getToken(app);
+  const token = await getAuthToken(app);
   return token.access_token;
 }

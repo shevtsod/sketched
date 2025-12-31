@@ -1,6 +1,10 @@
-# Sketched 🎨
+# Sketched
 
 A web game about drawing things from memory!
+
+> [!WARNING]
+>
+> Sketched is very early in development and still missing basic functionality!
 
 ## Getting Started
 
